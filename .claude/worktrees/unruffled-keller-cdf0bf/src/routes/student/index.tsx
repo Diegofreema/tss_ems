@@ -1,34 +1,34 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
-import { BarChart } from '@/components/charts/bar-chart'
-import { ActivityList } from '@/components/common/activity-list'
-import { FigureTiles } from '@/components/common/figure-tiles'
-import { EmptyState } from '@/components/feedback/empty-state'
-import { Rule } from '@/components/page/rule'
-import { Button } from '@/components/ui/button'
-import { useFirstName } from '@/features/auth/session'
-import { studentHome } from '@/portals/student/api/dashboard'
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ArrowRight } from 'lucide-react';
+import { BarChart } from '@/components/charts/bar-chart';
+import { ActivityList } from '@/components/common/activity-list';
+import { FigureTiles } from '@/components/common/figure-tiles';
+import { EmptyState } from '@/components/feedback/empty-state';
+import { Rule } from '@/components/page/rule';
+import { Button } from '@/components/ui/button';
+import { useFirstName } from '@/features/auth/session';
+import { studentHome } from '@/portals/student/api/dashboard';
 import {
   studentInvoicesQuery,
   studentStatsQuery,
-} from '@/portals/student/api/queries'
+} from '@/portals/student/api/queries';
 
 export const Route = createFileRoute('/student/')({
-  staticData: { title: 'Dashboard', crumb: 'NETPRO EMS Bronze' },
+  staticData: { title: 'Dashboard', crumb: 'TSS EMS Bronze' },
   loader: ({ context }) =>
     Promise.all([
       context.queryClient.ensureQueryData(studentStatsQuery),
       context.queryClient.ensureQueryData(studentInvoicesQuery),
     ]),
   component: StudentDashboard,
-})
+});
 
 function StudentDashboard() {
-  const name = useFirstName('there')
-  const { data: stats } = useSuspenseQuery(studentStatsQuery)
-  const { data: ledger } = useSuspenseQuery(studentInvoicesQuery)
-  const home = studentHome(stats, ledger.invoices)
+  const name = useFirstName('there');
+  const { data: stats } = useSuspenseQuery(studentStatsQuery);
+  const { data: ledger } = useSuspenseQuery(studentInvoicesQuery);
+  const home = studentHome(stats, ledger.invoices);
 
   return (
     <>
@@ -81,5 +81,5 @@ function StudentDashboard() {
         </section>
       </div>
     </>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * NETPRO EMS — reverse proxy for the school's API.
+ * TSS EMS — reverse proxy for the school's API.
  *
  * WHY THIS FILE EXISTS
  * The school's API sends no Access-Control-Allow-Origin header, so a browser

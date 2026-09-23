@@ -1,21 +1,21 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
-import { BarChart } from '@/components/charts/bar-chart'
-import { ActivityList } from '@/components/common/activity-list'
-import { FigureTiles } from '@/components/common/figure-tiles'
-import { EmptyState } from '@/components/feedback/empty-state'
-import { Panel } from '@/components/page/panel'
-import { Button } from '@/components/ui/button'
-import { NotificationsPanel } from '@/features/notifications/components/notifications-panel'
-import { useMyNotifications } from '@/features/notifications/use-notice-feed'
-import { useFirstName } from '@/features/auth/session'
-import { freshen } from '@/db/collection'
-import { schoolingInvoices, schoolingStats } from '@/db/collections/schooling'
-import { useHeldDocument } from '@/db/live'
-import { studentHome } from '@/portals/student/api/dashboard'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ArrowRight } from 'lucide-react';
+import { BarChart } from '@/components/charts/bar-chart';
+import { ActivityList } from '@/components/common/activity-list';
+import { FigureTiles } from '@/components/common/figure-tiles';
+import { EmptyState } from '@/components/feedback/empty-state';
+import { Panel } from '@/components/page/panel';
+import { Button } from '@/components/ui/button';
+import { NotificationsPanel } from '@/features/notifications/components/notifications-panel';
+import { useMyNotifications } from '@/features/notifications/use-notice-feed';
+import { useFirstName } from '@/features/auth/session';
+import { freshen } from '@/db/collection';
+import { schoolingInvoices, schoolingStats } from '@/db/collections/schooling';
+import { useHeldDocument } from '@/db/live';
+import { studentHome } from '@/portals/student/api/dashboard';
 
 export const Route = createFileRoute('/student/')({
-  staticData: { title: 'Dashboard', crumb: 'NETPRO EMS Bronze' },
+  staticData: { title: 'Dashboard', crumb: 'TSS EMS Bronze' },
   // Readied here rather than suspended on: the counters and the ledger arrive
   // together or not at all, and a refusal is swallowed so a student with no
   // connection lands on their own home page rather than an error boundary.
@@ -28,17 +28,17 @@ export const Route = createFileRoute('/student/')({
   // without the page waiting on it.
   loader: () => freshen([schoolingStats, schoolingInvoices]),
   component: StudentDashboard,
-})
+});
 
 function StudentDashboard() {
-  const name = useFirstName('there')
-  const { doc: stats } = useHeldDocument(schoolingStats)
-  const { doc: ledger } = useHeldDocument(schoolingInvoices)
+  const name = useFirstName('there');
+  const { doc: stats } = useHeldDocument(schoolingStats);
+  const { doc: ledger } = useHeldDocument(schoolingInvoices);
   // Both stand in empty where the device holds nothing: the home page's job is
   // to say what the school holds, and "nothing yet" is an answer it already
   // knows how to draw.
-  const home = studentHome(stats ?? ({} as never), ledger?.invoices ?? [])
-  const notifications = useMyNotifications()
+  const home = studentHome(stats ?? ({} as never), ledger?.invoices ?? []);
+  const notifications = useMyNotifications();
 
   return (
     <>
@@ -95,5 +95,5 @@ function StudentDashboard() {
         />
       </div>
     </>
-  )
+  );
 }

@@ -6,7 +6,7 @@ export function SidebarBrand({ roleLabel }: { roleLabel: string }) {
         <div className="size-6 flex-none rounded-sm bg-brand" />
         <div>
           <div className="font-heading text-base leading-none font-extrabold">
-            NETPRO EMS
+            TSS EMS
           </div>
           <div className="mt-0.75 text-2xs uppercase tracking-[0.1em] text-muted-foreground">
             {roleLabel}
@@ -14,5 +14,5 @@ export function SidebarBrand({ roleLabel }: { roleLabel: string }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-# NETPRO EMS
+# TSS EMS
 
 A school portal for four kinds of people — the office, teachers, students and guardians — running in
 Nigerian schools where the connection is intermittent or absent.
@@ -62,14 +62,14 @@ visibly not one.
   `collection-list.tsx`, the data table or the pagination changes. Not yet compatible with `filters`.
   Ordering lives in `src/features/collections/order.ts`.
 - **An endpoint that answers with a document is kept whole**, through `schoolDocument()`. A student's
-  fee ledger is the bills *and* the payments taken against them; the timetable is the grid *and* the
-  class it was drawn for; the mark catalogue is the words *and* which of them mean the child was in
+  fee ledger is the bills _and_ the payments taken against them; the timetable is the grid _and_ the
+  class it was drawn for; the mark catalogue is the words _and_ which of them mean the child was in
   school. The list is one field of the answer, and storing the field alone throws away what the
   panel beside it reads. `heldDocument()` reads one back, `useHeldDocument()` in `src/db/live.ts`
   watches one from a component.
 - **A page reads a set with `useHeld`/`useHeldDocument`, never `useSuspenseQuery`.** There is
   nothing to suspend on once the reading is local, and a paused request never settles. `pending` is
-  true only before a set has answered *either way*: a set that refused is not pending, it is a set
+  true only before a set has answered _either way_: a set that refused is not pending, it is a set
   this device has never synced and cannot sync now, which is a thing to say rather than spin on.
 
 - **Every summary tile is counted on its own** (`Promise.allSettled`), and the strip runs with
@@ -120,7 +120,7 @@ Measured: opening Add teacher fires `GET /departments`, choosing a class fires `
 opening Performance fires `departments`, `subjects`, `semesters` and `sessions`, and a class that
 appears only in the endpoint's answer is offered without a reload.
 **The catalogue and the fee list are in that list for a second reason as well**, and it is the one
-worth carrying: each is offered through a filter on its *own mutable status* — the lending picker
+worth carrying: each is offered through a filter on its _own mutable status_ — the lending picker
 shows only `isavailable === 'Available'`, the fee picker only `status === 1`. That is the office's
 state rather than a fact about the school, and the counter is where a stale copy shows: a book
 withdrawn this morning was still offered to be lent this afternoon, and a fee retired this morning
@@ -153,8 +153,8 @@ up to `request()`'s own 30s bound to show a page the device could already draw, 
 into a page that is already up and the live queries redraw it. **Nothing in it can fail**: a set that
 could not be refreshed is a page showing what the school last said, which is the point of holding it,
 and a loader that threw would take the page down over a connection. And **what is derived from a set
-is dropped after the answers land, never beside them** — a count tile is a react-query read *built
-out of* the set rather than a live query over it, so dropping it mid-flight re-counts the rows being
+is dropped after the answers land, never beside them** — a count tile is a react-query read _built
+out of_ the set rather than a live query over it, so dropping it mid-flight re-counts the rows being
 replaced and writes them back as fresh; the same race `dropDerivedReads` documents after a write, met
 on the way into a page. Only that register's own key is dropped: a navigation is not a write.
 Measured on the student's portal, which is where it went in first: four SPA navigations between two
@@ -189,7 +189,7 @@ editions apart rather than typed to find one. There is no shared search across t
 the term travels as a plain string and `searchFeed` decides what to call it at each endpoint.
 The **lending field is the case that made a third one worth having**, and its reasoning is not the
 others': the catalogue is not too long to hold — the device holds it, for the shelf — it is that
-opening a dropdown of every title in order to lend *one* of them fetches the whole of it to use a
+opening a dropdown of every title in order to lend _one_ of them fetches the whole of it to use a
 single row, at the one desk where a queue is waiting. It is also the one library list that only ever
 grows. So the field types instead of scrolling, and there is no unsearched `books` feed left beside
 it.
@@ -207,7 +207,7 @@ and is not once a retired title can sit in a dozen cached searches.
 **A search box's settled term lives in the URL** — `useUrlTerm` in `src/hooks/use-url-term.ts`, which
 is one implementation shared by every register's search row and by the lending form's title field.
 The split is the point: the box shows every keystroke and the URL holds what was actually asked for,
-300ms behind it, so a search costs one request rather than one per keystroke *and* the address bar is
+300ms behind it, so a search costs one request rather than one per keystroke _and_ the address bar is
 never a half-typed word. What that buys is a narrowed list that survives a reload, comes back with
 the back button and travels in a link. A field opts in with `searchParam` on its spec, and **the
 route must declare the key in its own `validateSearch`** — nuqs writes through the router here, so a
@@ -256,12 +256,12 @@ every write made after it would wedge the app on one refusal.
   straight rather than through a mutation for the same reason a queued save is. Worth giving only to
   a register that already reads off the device: a queued action on a register nobody can open with
   no connection is a button on a row nobody can see.
-- **A queued change to an existing row is shown by the binding's `overlay`**, as a queued *new*
+- **A queued change to an existing row is shown by the binding's `overlay`**, as a queued _new_
   record is shown by `queued`. Without it a queued row action reads as a button that did nothing —
   the op is safe on the device and the row still says what the school last said. The row shows what
   it is about to be; the banner and the drawer say it has not got there yet.
 - **`enqueue` drops the derived reads itself.** A write accepted on the device makes what is derived
-  from it stale *now*, not when the school eventually hears about it. A register on a live query
+  from it stale _now_, not when the school eventually hears about it. A register on a live query
   follows the queue by itself; the figures above it are react-query and do not.
 - **The guardrail covers row actions too**, not just edit and delete: making a session current is a
   school setting pointing at a row, and it cannot point at one the school has never issued. The row
@@ -289,7 +289,7 @@ every write made after it would wedge the app on one refusal.
   terminal one fails that op and cascades to whatever depended on it.
 - **401 pauses the whole drain and burns no attempts; 403 does not.** An expired token must not turn
   thirty saved attendance marks into thirty permanent failures — but this API answers 401 for a
-  token it will not take and keeps 403 for what this account may not do to *this row*: a class you
+  token it will not take and keeps 403 for what this account may not do to _this row_: a class you
   do not teach, a child who is not yours, somebody not on your contacts list. Pausing on those wedged
   the queue for the rest of the session behind one write the school was never going to accept, with
   the banner still calling it "still being sent". A 403 fails its own op, with the school's sentence,
@@ -355,7 +355,7 @@ of students, not thousands, so `A_SCHOOL` in `reference.ts` is the size the regi
 and the one place a change of scale shows up. A school in the thousands wants the student and
 household registers paged at the endpoint again.
 
-**A register whose filter *replaces* the population holds both and picks one.** The staff page is
+**A register whose filter _replaces_ the population holds both and picks one.** The staff page is
 teachers and office records — two endpoints — and its dropdown swaps between them rather than
 narrowing. Both sets are on the device, the rows are told apart by the kind their own key carries,
 and `narrow` picks the population; the pinned pages are the same binding with the choice made for
@@ -366,7 +366,7 @@ the office records beside them, and the catalogue that names an office account's
 
 **What a picker offers is decided by the figure that answers the question, not by the flag that
 looks like it does.** The lending counter offered `isavailable === 'Available'` and so hid "Things
-Fall Apart" — thirty copies, none out — because that field is the office's *do we lend this at all*
+Fall Apart" — thirty copies, none out — because that field is the office's _do we lend this at all_
 switch and has nothing to do with stock. It filters on `stock.available > 0` now, which is `copies`
 minus what is out and is the library's own arithmetic: one `GET /loanedbooks/stock/{id}` per result,
 run together, capped by the search. Three things make that affordable and safe. **The box asks for
@@ -379,7 +379,7 @@ with no signal still gets a list of what can go out.
 
 **A reader written from a contract is a guess, and it fails silently.** The lending register was
 the worked example, and it cost a page. The 2026-09-03 document named `book_title`, `student_name`,
-`due_date` and `returned: 'Yes'`; bronze sends `book` (the title as a *string*), `student: null`
+`due_date` and `returned: 'Yes'`; bronze sends `book` (the title as a _string_), `student: null`
 beside a `student_id`, `due`, and `returned` as a **boolean**. Every reader took the documented name
 first, found nothing, and fell through — so the office's register drew "Student 12" borrowing
 "Book 2" with no due date, every loan standing "Out" including the returned ones, and an Overdue
@@ -402,7 +402,7 @@ prefix it had invented, and the test agreed with it because the fixtures used th
 too — so both passed and the page showed an administrator on the teaching register. The reader is
 passed in now. A test written against a shape nobody produces proves nothing.
 
-**Money is not queued.** The fee *catalogue* is — what the school charges, and whether it still
+**Money is not queued.** The fee _catalogue_ is — what the school charges, and whether it still
 charges it — but raising an invoice against a fee and taking payment for one are not. A payment
 accepted on a device and sent later is a receipt the bursary cannot reconcile, which is a different
 decision from the ones this queue was built for.
@@ -446,7 +446,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
 - **Two tabs share one queue, and only one of them sends.** The persistence coordinator
   (`BrowserCollectionCoordinator`, Web Locks + BroadcastChannel) elects one tab per collection so a
   single SQLite file has a single writer and the tabs see each other's rows. That says nothing about
-  who is allowed to *send*, which is the dangerous half — a queued create is not idempotent — so the
+  who is allowed to _send_, which is the dangerous half — a queued create is not idempotent — so the
   drain holds a Web Lock of its own (`one-tab.ts`) and a second tab that cannot get it simply does
   not drain. A browser with no Web Locks runs unguarded, which is the single-tab behaviour the app
   had before and no worse than it.
@@ -512,7 +512,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   The outbox drain drops them **once at the end of a pass**, not per op — thirty attendance marks
   are thirty ops, and thirty full resyncs would ask the school the same questions thirty times.
   **The reads are dropped twice: once at once, and again after the device's own sets have caught
-  up.** A derived read built *out of* a collection — a record's sub-table counting `heldRows`, a
+  up.** A derived read built _out of_ a collection — a record's sub-table counting `heldRows`, a
   count tile, a register still on the query path — is a snapshot of what the set held when it last
   ran, not a live query, so starting the resync and the invalidation together let the refetch beat
   the sync: it re-read the rows the write had just made stale, wrote them back as fresh, and
@@ -563,7 +563,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   empty on every scope this school can answer for, so its keys are still guesses and it is the
   shape most likely to break the way `grades` did.
 - **A teacher's class arm is offered only once a class is chosen, narrowed by it.** `optionsFrom:
-  'arms'` with `dependsOn: 'department_id'` — the box is disabled and reads "Pick a class first"
+'arms'` with `dependsOn: 'department_id'` — the box is disabled and reads "Pick a class first"
   until then. Narrowed **on the device**, not at the endpoint: `arms` filters the held set by
   `department_id`, which is the same answer `class-arms/for-department/{id}` gives and costs no
   request, so the dropdown still fills with no connection. Measured: choosing a class and opening
@@ -610,7 +610,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   `/users/me` carries `isdefaultpassword` on every answer, so it is read off the stored account
   rather than remembered from the sign-in — `usingDefaultPassword` in `features/auth/role.ts`, and
   `DefaultPasswordGate` in `AppShell`, once for all four portals. Two things about the flag are
-  load-bearing. It is the *word* `"true"`, so `Boolean(flag)` would gate the whole school on
+  load-bearing. It is the _word_ `"true"`, so `Boolean(flag)` would gate the whole school on
   `"false"`; and a deployment that does not send it at all is a no, because a portal must never be
   shut on a question the school was never asked. Nothing dismisses the gate — no Escape, no scrim,
   no close button — but it offers the way out as well as the way through, since somebody at a
@@ -629,7 +629,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   lazy and both against the one schema in `extensions.ts` — which is also the sanitiser, since a
   stored body is parsed against it rather than set as HTML on an element. A record form asks for one
   with `rich: true`, and a field declared `rich` in a `form` must be declared `rich` in the `detail`
-  beside it or the panel draws the tags. What is *not* the editor: an address, a teller reference,
+  beside it or the panel draws the tags. What is _not_ the editor: an address, a teller reference,
   an arm's description — short structured values, where HTML is noise the API then has to store.
   Three rules follow. **Emptiness is `hasText`, never a trim** — an emptied editor hands back
   `<p></p>`, which is a non-empty string and passes every check made on one. **A preview is
@@ -669,7 +669,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   does not.
   The alias trap that `.auth-daylight` existed to work around is worth keeping in mind even though
   nothing hits it now: a shadcn alias is resolved where it is declared, so a container that
-  redeclares `--ems-ink` alone still inherits `<html>`'s *resolved* `--muted-foreground`. Redeclaring
+  redeclares `--ems-ink` alone still inherits `<html>`'s _resolved_ `--muted-foreground`. Redeclaring
   tokens on a subtree means redeclaring the aliases over them.
   There is still no theme toggle on these screens, which is the design's own decision: the theme is
   chosen in a portal's header and remembered on the device, so the sign-in page follows a choice
@@ -707,7 +707,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   card standing on it — and a border is still refused, since a page of bordered cards is a page of
   lines. The register, its search row and its pager are one card; a record form is one card; a
   dashboard is a card per figure. **A figure card carries `--ems-figure`, not the panel's white**:
-  the counted tiles over a register sit *inside* a panel, so flat made them white on white and they
+  the counted tiles over a register sit _inside_ a panel, so flat made them white on white and they
   read as loose text. The token is declared in both themes because the themes need opposite tools —
   in daylight an edge and a shadow, at night a fill lifted above whatever it stands on, since a
   shadow on near-black is nothing.
@@ -715,7 +715,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   `--rail-open` and `--rail-shut` in `index.css` with the rest of the shell's sizes, and the fold is
   remembered on the device beside the sections a reader has opened (`shell.store.ts`).
   The structure is the point: a slot in the shell's flex row holds the width the page is measured
-  against, and the rail sits *inside* it, positioned, so it can be wider than its slot. Shutting the
+  against, and the rail sits _inside_ it, positioned, so it can be wider than its slot. Shutting the
   rail narrows both and the page slides over to take the room; **hovering a shut rail widens only
   the inner one**, so the register being read does not reflow every time the pointer crosses the
   mark — the rail floats over it with a shadow (`[data-rail='peek']`) and goes again. Measured:
@@ -758,7 +758,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   `lg:`/`xl:` on anything under `AppShell` is asking about a box the content is not in. Measured, it
   was wrong exactly where a laptop sits: at a 1279px window the four headline figures of every
   dashboard were two cards 476px wide, and at 1281 they were four. So the content column carries
-  `@container/page` and pages query *it* (`@3xl/page:grid-cols-…`); a strip of equal things skips
+  `@container/page` and pages query _it_ (`@3xl/page:grid-cols-…`); a strip of equal things skips
   the query and asks for `repeat(auto-fit, minmax(…))`, which has no edge to fall off. Keep viewport
   breakpoints for what genuinely fills the window — the landing page, the sign-in split, a dialog.
   Type is left alone on this axis: the portal reads at 15px with 24px titles, and the fix for a
@@ -810,7 +810,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   filter row, on the reasoning that the eye is already there having just read the title. The
   reasoning did not survive the screen: a register carries a search box and four filters, which on a
   laptop is already more than one line's worth, so the one button somebody came to press was the
-  thing that wrapped — landing *under* the filters. `FilterBar` takes no `action`; `PageHeader`
+  thing that wrapped — landing _under_ the filters. `FilterBar` takes no `action`; `PageHeader`
   does.
 - **Tests are `node --test` on pure logic.** A module under test uses relative imports with explicit
   `.ts` extensions, and no parameter properties (`erasableSyntaxOnly`). Anything risky in the local-

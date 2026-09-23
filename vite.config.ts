@@ -28,7 +28,7 @@ export default defineConfig({
       // No `includeAssets`: `globPatterns` below already takes every svg and
       // png in `public/`, and naming them twice puts them in the manifest twice.
       manifest: {
-        name: 'NETPRO EMS',
+        name: 'TSS EMS',
         short_name: 'NETPRO',
         description:
           'The school portal — registers, results, fees and timetables, on your device.',

@@ -1,4 +1,4 @@
-# NETPRO EMS — Apache / cPanel configuration
+# TSS EMS — Apache / cPanel configuration
 # Place in the same folder as index.html (normally public_html).
 #
 # Rule order matters and is not arbitrary. In .htaccess, [L] restarts the

@@ -12,7 +12,7 @@ import { greeting } from '@/lib/greeting';
 import { teacherDashboardQuery } from '@/portals/teacher/api/dashboard';
 
 export const Route = createFileRoute('/teacher/')({
-  staticData: { title: 'Dashboard', crumb: 'NETPRO EMS Bronze' },
+  staticData: { title: 'Dashboard', crumb: 'TSS EMS Bronze' },
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(teacherDashboardQuery),
   component: TeacherDashboard,

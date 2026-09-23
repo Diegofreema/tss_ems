@@ -1,4 +1,4 @@
-# Deploying NETPRO EMS to cPanel
+# Deploying TSS EMS to cPanel
 
 Build once, upload, done. Everything here has been exercised locally except
 where it says otherwise.
@@ -21,7 +21,7 @@ Verified live 2026-09-23: `/backend/api/users/me` answers with the envelope,
 `/backend/users/me` is a 404 — an HTML one, with **no** CORS header on it.
 That matters more than it looks: Laravel's CORS middleware is scoped to the
 `api` routes, so calling the wrong path does not read as a 404 in the browser,
-it reads as *"No 'Access-Control-Allow-Origin' header is present"*. A CORS
+it reads as _"No 'Access-Control-Allow-Origin' header is present"_. A CORS
 error here is far more often a wrong path than a wrong CORS policy.
 
 The host **does** send CORS headers on `/backend/api/*` now — measured, including
@@ -52,12 +52,12 @@ removed once the certificate is valid.
 
 Set in four places, all of which must agree:
 
-| Where | What |
-|---|---|
-| `src/api/client.ts` | `${location.origin}/backend/api` (override with `VITE_API_URL`) |
-| `vite.config.ts` → `server.proxy` | dev only — proxies `/backend` to the live host |
-| `vite.config.ts` → workbox | `navigateFallbackDenylist` and the `NetworkOnly` rule both match `/backend` |
-| `deploy/cpanel/.htaccess` | passes `/backend` through, so the SPA fallback cannot swallow it |
+| Where                             | What                                                                        |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `src/api/client.ts`               | `${location.origin}/backend/api` (override with `VITE_API_URL`)             |
+| `vite.config.ts` → `server.proxy` | dev only — proxies `/backend` to the live host                              |
+| `vite.config.ts` → workbox        | `navigateFallbackDenylist` and the `NetworkOnly` rule both match `/backend` |
+| `deploy/cpanel/.htaccess`         | passes `/backend` through, so the SPA fallback cannot swallow it            |
 
 The other four entries match on the `/backend` prefix, so they cover
 `/backend/api` without change.
@@ -65,7 +65,7 @@ The other four entries match on the `/backend` prefix, so they cover
 ### The proxy is no longer shipped
 
 `deploy/cpanel/api/index.php` is kept in the repo but **not** included in the
-package. It is the forwarder for a *cross-origin* backend — if the API ever
+package. It is the forwarder for a _cross-origin_ backend — if the API ever
 moves to another domain, restore the `/api` rule in `.htaccess`, copy the file
 back, and point `$UPSTREAM` at it. Same-origin needs none of it.
 
@@ -92,13 +92,13 @@ public_html/
 
 ## Requirements on the host
 
-| Need | Why | If missing |
-|---|---|---|
-| **PHP 8.2+** for the domain | Laravel's own requirement | **The API returns 500 and nothing works.** This is the current state — see below |
-| `mod_rewrite` | SPA routes | Only the home page works |
-| `mod_headers` | Caching and security headers | Works, but browsers may cache a stale shell |
-| `mod_deflate` | Compression | Works, first load is ~6.5 MB instead of ~1.6 MB |
-| HTTPS | Service workers require a secure context | **No offline support at all** |
+| Need                        | Why                                      | If missing                                                                       |
+| --------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------- |
+| **PHP 8.2+** for the domain | Laravel's own requirement                | **The API returns 500 and nothing works.** This is the current state — see below |
+| `mod_rewrite`               | SPA routes                               | Only the home page works                                                         |
+| `mod_headers`               | Caching and security headers             | Works, but browsers may cache a stale shell                                      |
+| `mod_deflate`               | Compression                              | Works, first load is ~6.5 MB instead of ~1.6 MB                                  |
+| HTTPS                       | Service workers require a secure context | **No offline support at all**                                                    |
 
 ### ⚠️ The backend is currently down
 
@@ -121,7 +121,7 @@ Once it is up, confirm with:
 curl -s https://portal.tss.sch.ng/backend/api/users/me
 ```
 
-It should answer with the JSON envelope — a 401 *"Authentication required"* is
+It should answer with the JSON envelope — a 401 _"Authentication required"_ is
 the correct, healthy response to a token-free call. Note the `/api`: without it
 the same call 404s, and in a browser that 404 surfaces as a CORS error.
 
@@ -132,24 +132,24 @@ the same call 404s, and in a browser that 404 surfaces as a CORS error.
 Tested locally by serving the built package and comparing the proxy's output
 against direct calls to the school's API.
 
-| Check | Result |
-|---|---|
-| App builds | ✅ 449 precache entries, 6.5 MB, no errors |
-| App renders (sign-in, fonts, images, poster) | ✅ screenshot |
-| Deep SPA route (`/admin/students`) returns the shell, not 404 | ✅ |
-| Hashed assets serve with correct MIME | ✅ |
-| `manifest.webmanifest`, `sw.js` serve | ✅ |
-| Bundle calls `/backend` on its own origin | ✅ confirmed in the browser |
-| No stale `/api` base anywhere in the bundle | ✅ |
-| Service worker excludes `/backend` from the shell fallback | ✅ both rules present in `sw.js` |
-| typecheck / lint / 1266 tests | ✅ all pass |
-| **Live API reachable** | ❌ **500 — backend PHP version, see above** |
-| **Service worker registration** | ⚠️ **Not verified** — see below |
+| Check                                                         | Result                                      |
+| ------------------------------------------------------------- | ------------------------------------------- |
+| App builds                                                    | ✅ 449 precache entries, 6.5 MB, no errors  |
+| App renders (sign-in, fonts, images, poster)                  | ✅ screenshot                               |
+| Deep SPA route (`/admin/students`) returns the shell, not 404 | ✅                                          |
+| Hashed assets serve with correct MIME                         | ✅                                          |
+| `manifest.webmanifest`, `sw.js` serve                         | ✅                                          |
+| Bundle calls `/backend` on its own origin                     | ✅ confirmed in the browser                 |
+| No stale `/api` base anywhere in the bundle                   | ✅                                          |
+| Service worker excludes `/backend` from the shell fallback    | ✅ both rules present in `sw.js`            |
+| typecheck / lint / 1266 tests                                 | ✅ all pass                                 |
+| **Live API reachable**                                        | ❌ **500 — backend PHP version, see above** |
+| **Service worker registration**                               | ⚠️ **Not verified** — see below             |
 
 ### The one unverified thing
 
 **Service workers are disabled in the browser used for testing.** Proved rather
-than assumed: registering a deliberately *empty* service worker failed with the
+than assumed: registering a deliberately _empty_ service worker failed with the
 identical error, so this is the test environment and not the build.
 
 **After your first upload, open the site on a real browser over HTTPS and
@@ -170,7 +170,7 @@ after every deploy and there is no way to reach them to say so.
 
 ### `[L]` versus `[END]`
 
-The rewrite rules use `[END]`, not `[L]`. In `.htaccess`, `[L]` *restarts* the
+The rewrite rules use `[END]`, not `[L]`. In `.htaccess`, `[L]` _restarts_ the
 ruleset with the rewritten URI rather than stopping — which makes the `/api`
 rule re-enter itself and the HTTPS redirect unreachable. `[END]` is Apache 2.4+,
 which every cPanel host runs.
@@ -185,7 +185,7 @@ which every cPanel host runs.
 
 Upload and extract over the top. Old hashed assets can be left; they are
 harmless and let a tab mid-session finish loading. The service worker is
-`registerType: 'prompt'`, so users are *offered* the new version rather than
+`registerType: 'prompt'`, so users are _offered_ the new version rather than
 being reloaded mid-task — which matters to a teacher halfway through a register.
 
 ## Subdirectory hosting
@@ -198,7 +198,7 @@ changes to the PWA `scope`, `start_url` and `navigateFallback`, and the
 ## Uploads
 
 If file uploads fail with large files, raise `upload_max_filesize` and
-`post_max_size` in cPanel → *MultiPHP INI Editor*. The proxy rebuilds multipart
+`post_max_size` in cPanel → _MultiPHP INI Editor_. The proxy rebuilds multipart
 bodies and is bounded by whatever PHP allows.
 
 ---

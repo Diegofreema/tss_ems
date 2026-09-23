@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds NETPRO EMS and assembles the cPanel deployment package.
+# Builds TSS EMS and assembles the cPanel deployment package.
 #
 #   ./deploy/package.sh
 #

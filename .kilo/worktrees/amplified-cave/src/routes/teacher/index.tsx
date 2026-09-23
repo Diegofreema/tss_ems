@@ -14,13 +14,15 @@ import { greeting } from '@/lib/greeting';
 import { teacherDashboardQuery } from '@/portals/teacher/api/dashboard';
 
 export const Route = createFileRoute('/teacher/')({
-  staticData: { title: 'Dashboard', crumb: 'NETPRO EMS Bronze' },
+  staticData: { title: 'Dashboard', crumb: 'TSS EMS Bronze' },
   // Started and swallowed: a loader that awaited a paused query used to hang
   // the dashboard on its shimmer for as long as the device was offline. The
   // component's `useSuspenseQuery` reads the same key and throws the honest
   // failure to `RouteError`, which offers a retry.
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(teacherDashboardQuery).catch(() => undefined),
+    context.queryClient
+      .ensureQueryData(teacherDashboardQuery)
+      .catch(() => undefined),
   component: TeacherDashboard,
 });
 

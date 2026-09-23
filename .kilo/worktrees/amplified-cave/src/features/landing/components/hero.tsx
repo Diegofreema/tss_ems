@@ -1,7 +1,7 @@
-import { Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { HERO_FACTS } from '../landing.content'
-import { HeroLattice } from './hero-lattice'
+import { Link } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
+import { HERO_FACTS } from '../landing.content';
+import { HeroLattice } from './hero-lattice';
 
 /**
  * The lattice sits behind the words rather than beside them, so the wrapper
@@ -30,11 +30,11 @@ export function Hero() {
           </h1>
 
           <p className="mt-6.5 max-w-[46ch] text-[clamp(15px,1.5vw,19px)] leading-[1.5] text-neutral-800">
-            NETPRO EMS holds enrolment, fees, attendance, scores and reports in a
-            single structure, gives the office, the staff room, the student and the
-            parent their own way into it, and puts an AI assistant on top of it that
-            drafts the report comments, flags the fees at risk and answers the
-            parent’s question.
+            TSS EMS holds enrolment, fees, attendance, scores and reports in a
+            single structure, gives the office, the staff room, the student and
+            the parent their own way into it, and puts an AI assistant on top of
+            it that drafts the report comments, flags the fees at risk and
+            answers the parent’s question.
           </p>
 
           <div className="mt-8.5 flex flex-wrap gap-3">
@@ -50,7 +50,10 @@ export function Hero() {
         {/* Opaque on its own ground: the lattice must not cross the text. */}
         <div className="pointer-events-auto grid w-[min(100%,380px)] justify-self-end gap-[2px] self-end border-l-2 border-ink bg-ground pb-1 pl-4">
           {HERO_FACTS.map((fact) => (
-            <div key={fact.name} className="border-t border-divider-strong pt-[13px] pb-[11px]">
+            <div
+              key={fact.name}
+              className="border-t border-divider-strong pt-[13px] pb-[11px]"
+            >
               <div className="font-heading text-[clamp(16px,1.8vw,20px)] font-extrabold tracking-[-.015em]">
                 {fact.name}
               </div>
@@ -62,5 +65,5 @@ export function Hero() {
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -1,5 +1,5 @@
-import { Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
+import { Link } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
 
 /** The section links, dropped on a narrow screen where the two buttons matter more. */
 const LINKS = [
@@ -7,7 +7,7 @@ const LINKS = [
   { href: '#term', label: 'A term, end to end' },
   { href: '#features', label: 'Features' },
   { href: '#ai', label: 'AI' },
-]
+];
 
 /**
  * Sticky, and it stays sticky only because nothing above it scrolls on its own
@@ -18,10 +18,13 @@ export function LandingHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-divider-strong bg-[color-mix(in_srgb,var(--ems-ground)_88%,transparent)] backdrop-blur-[10px]">
       <div className="mx-auto flex max-w-[1320px] items-center gap-[clamp(16px,3vw,40px)] px-[clamp(20px,4vw,48px)] py-3.5">
-        <a href="#top" className="flex items-center gap-2.5 text-ink no-underline">
+        <a
+          href="#top"
+          className="flex items-center gap-2.5 text-ink no-underline"
+        >
           <div className="size-5 flex-none bg-brand" />
           <div className="font-heading text-base font-extrabold tracking-[-.01em] whitespace-nowrap">
-            NETPRO EMS
+            TSS EMS
           </div>
         </a>
 
@@ -45,5 +48,5 @@ export function LandingHeader() {
         </nav>
       </div>
     </header>
-  )
+  );
 }

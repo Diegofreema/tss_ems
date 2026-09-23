@@ -1,31 +1,33 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ChartColumn } from 'lucide-react'
-import { ActivityList } from '@/components/common/activity-list'
-import { SectionHeading } from '@/components/common/section-heading'
-import { BarChart } from '@/components/charts/bar-chart'
-import { Panel } from '@/components/page/panel'
-import { TileStrip } from '@/components/page/tile-strip'
-import { Button } from '@/components/ui/button'
-import { useFirstName } from '@/features/auth/session'
-import { adminDashboardQuery } from '@/portals/admin/api/dashboard'
-import { greeting } from '@/lib/greeting'
-import { FigureTiles } from '@/components/common/figure-tiles'
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ChartColumn } from 'lucide-react';
+import { ActivityList } from '@/components/common/activity-list';
+import { SectionHeading } from '@/components/common/section-heading';
+import { BarChart } from '@/components/charts/bar-chart';
+import { Panel } from '@/components/page/panel';
+import { TileStrip } from '@/components/page/tile-strip';
+import { Button } from '@/components/ui/button';
+import { useFirstName } from '@/features/auth/session';
+import { adminDashboardQuery } from '@/portals/admin/api/dashboard';
+import { greeting } from '@/lib/greeting';
+import { FigureTiles } from '@/components/common/figure-tiles';
 
 export const Route = createFileRoute('/admin/')({
-  staticData: { title: 'Dashboard', crumb: 'NETPRO EMS Bronze' },
+  staticData: { title: 'Dashboard', crumb: 'TSS EMS Bronze' },
   // Started and swallowed: a loader that awaited a paused query used to hang
   // the dashboard on its shimmer for as long as the device was offline. The
   // component's `useSuspenseQuery` reads the same key and throws the honest
   // failure to `RouteError`, which offers a retry.
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(adminDashboardQuery).catch(() => undefined),
+    context.queryClient
+      .ensureQueryData(adminDashboardQuery)
+      .catch(() => undefined),
   component: AdminDashboard,
-})
+});
 
 function AdminDashboard() {
-  const name = useFirstName('there')
-  const { data } = useSuspenseQuery(adminDashboardQuery)
+  const name = useFirstName('there');
+  const { data } = useSuspenseQuery(adminDashboardQuery);
 
   return (
     <>
@@ -72,5 +74,5 @@ function AdminDashboard() {
         </Panel>
       </div>
     </>
-  )
+  );
 }

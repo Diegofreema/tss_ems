@@ -23,9 +23,7 @@ export function AuthLayout() {
         <header className="flex items-center gap-3.5 border-b-2 border-divider px-7 py-4.5">
           <div className="flex items-center gap-2.5 lg:hidden">
             <div className="size-5.5 flex-none bg-brand" />
-            <div className="font-heading text-sm font-extrabold">
-              NETPRO EMS
-            </div>
+            <div className="font-heading text-sm font-extrabold">TSS EMS</div>
           </div>
           <div className="flex-1" />
           <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
@@ -45,7 +43,7 @@ export function AuthLayout() {
 
         <footer className="flex flex-wrap items-center gap-4.5 border-t-2 border-divider px-7 py-4">
           <div className="text-[11.5px] text-muted-foreground">
-            NETPRO EMS · Bronze · 2025/2026 session
+            TSS EMS · Bronze · 2025/2026 session
           </div>
           <div className="flex-1" />
         </footer>

@@ -6,7 +6,9 @@ export function LandingFooter() {
         <div>
           <div className="flex items-center gap-2.5">
             <div className="size-4.5 bg-brand" />
-            <div className="font-heading text-[14px] font-extrabold">NETPRO EMS</div>
+            <div className="font-heading text-[14px] font-extrabold">
+              TSS EMS
+            </div>
           </div>
           <div className="mt-3 text-[11.5px] leading-[1.5] text-muted-foreground">
             Educational management system
@@ -16,5 +18,5 @@ export function LandingFooter() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

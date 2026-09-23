@@ -5,7 +5,7 @@ export function AuthPoster() {
       <div className="flex items-center gap-3">
         <div className="size-6.5 flex-none bg-white" />
         <div className="font-heading text-base font-extrabold tracking-[-0.01em]">
-          NETPRO EMS
+          TSS EMS
         </div>
       </div>
 
