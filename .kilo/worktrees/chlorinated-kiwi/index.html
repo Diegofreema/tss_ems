@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/netpro-mark.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- The brand blue, --ems-brand in index.css. It tints the browser chrome
+         on Android and the status bar of an installed app, so it has to be the
+         same blue as the portal it opens onto. -->
+    <meta name="theme-color" content="#356ead" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NETPRO EMS</title>
+    <script>
+      // Set the theme before first paint so the page never flashes the wrong one.
+      document.documentElement.dataset.emsTheme =
+        localStorage.getItem('ems-theme') === 'dark' ? 'dark' : 'light'
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

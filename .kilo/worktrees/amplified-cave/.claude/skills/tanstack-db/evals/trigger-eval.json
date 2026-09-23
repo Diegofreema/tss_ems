@@ -1,0 +1,23 @@
+[
+  { "query": "im building an expo app and i want my todo list to keep working offline and sync back up when the phone gets signal again. whats the cleanest way to do optimistic updates so tapping a todo feels instant?", "should_trigger": true },
+  { "query": "we have a react admin dashboard hitting our REST api through react-query. i want cross-collection live joins between /api/orders and /api/customers plus instant writes, without rewriting the backend. how do i load them into normalized collections and join them client-side?", "should_trigger": true },
+  { "query": "how do i wire up powersync with @tanstack/react-db in react native so my on-device sqlite syncs bidirectionally to postgres?", "should_trigger": true },
+  { "query": "my optimistic insert flickers — the new row shows up, disappears for a split second, then comes back. im using queryCollectionOptions with an onInsert handler. what am i doing wrong?", "should_trigger": true },
+  { "query": "when one todo in a 5000 item list changes, does useLiveQuery re-render the entire list or just the row that changed? trying to understand the reactivity model before i commit to it", "should_trigger": true },
+  { "query": "i need a debounced autosave on a settings form that writes to my collection roughly every 500ms while the user types. whats the idiomatic way to pace those mutations?", "should_trigger": true },
+  { "query": "should i pick electricsql or powersync for a local-first app? it has a web client and a react native client and needs to work offline", "should_trigger": true },
+  { "query": "how do i write a custom collection adapter that syncs over a websocket connection — begin/write/commit lifecycle, confirming writes by ack, reconnect logic, that kind of thing", "should_trigger": true },
+  { "query": "im getting a SchemaValidationError every time i insert into my zod-validated collection, and separately my filter with eq(user.middleName, null) returns zero rows even though plenty are null. whats going on?", "should_trigger": true },
+  { "query": "i want the checkout button to feel instant — apply the change locally right away, send it to the server in the background, and roll it back automatically if the request fails. we're on react. what pattern or library should i use?", "should_trigger": true },
+
+  { "query": "how do i cache my api responses with tanstack query and tune staleTime and gcTime so it stops refetching every time a component mounts?", "should_trigger": false },
+  { "query": "i want to build a local-first markdown notes app. help me set up a sqlite database with drizzle orm and expo-sqlite and write the migrations", "should_trigger": false },
+  { "query": "set up realtime subscriptions with supabase in my nextjs app so the ui updates live when rows change in the messages table", "should_trigger": false },
+  { "query": "whats the best way to persist my redux store to asyncstorage in react native so state survives an app restart?", "should_trigger": false },
+  { "query": "add optimistic updates to my react-query useMutation for a like button — onMutate to bump the count, onError to roll it back, onSettled to invalidate. show me the code", "should_trigger": false },
+  { "query": "design a normalized postgres schema for a multi-tenant saas with orders, customers, and line items, including the foreign keys and indexes", "should_trigger": false },
+  { "query": "my differential dataflow pipeline in materialize is slow and the operator graph seems to be recomputing too much. how do i profile and optimize the timely dataflow?", "should_trigger": false },
+  { "query": "how do i query my mongodb collection efficiently with the right compound indexes from my node backend?", "should_trigger": false },
+  { "query": "build a live query on firestore with onSnapshot so my react component re-renders in realtime when documents change", "should_trigger": false },
+  { "query": "i want to cut down re-renders in a big react list — should i reach for useMemo, React.memo, or list virtualization with react-window?", "should_trigger": false }
+]

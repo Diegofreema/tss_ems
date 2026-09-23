@@ -1,0 +1,114 @@
+import { parseAsString, useQueryState } from 'nuqs'
+import { useMarkAllNoticesRead } from '@/api/notifications/hooks'
+import { SectionHeading } from '@/components/common/section-heading'
+import { SegmentedControl } from '@/components/common/segmented-control'
+import { PageHeader } from '@/components/page/page-header'
+import { Rule } from '@/components/page/rule'
+import { Button } from '@/components/ui/button'
+import { NotificationRow } from './components/notification-row'
+import { useNotificationsStore } from './notifications.store'
+import type { Notification } from './types'
+
+const GROUPS = ['Today', 'Earlier'] as const
+
+/** The full notification centre, grouped under Today and Earlier. */
+export function NotificationsPage({
+  notifications,
+  description,
+  /** Why the board is missing, where it is. */
+  boardError,
+}: {
+  notifications: Notification[]
+  description: string
+  boardError?: string | null
+}) {
+  const [filter, setFilter] = useQueryState(
+    'filter',
+    parseAsString.withDefault('all'),
+  )
+  const read = useNotificationsStore((state) => state.read)
+  const markAllRead = useNotificationsStore((state) => state.markAllRead)
+  const markBoardRead = useMarkAllNoticesRead()
+  const unread = notifications.filter((item) => !item.read && !read[item.id])
+
+  /**
+   * One call to `read-all`, and the browser's own marks alongside it so the
+   * wash lifts before the refetch confirms. Nothing is sent where nothing is
+   * unread — an empty call would still raise a toast claiming it did
+   * something.
+   */
+  const clearAll = () => {
+    markAllRead(notifications.map((item) => item.id))
+    if (unread.length > 0) markBoardRead.mutate()
+  }
+
+  const visible = filter === 'unread' ? unread : notifications
+
+  return (
+    <div className="max-w-[780px]">
+      <PageHeader
+        kicker="School"
+        title="Notifications"
+        description={description}
+        action={
+          <Button variant="outline" pending={markBoardRead.isPending} onClick={clearAll}>
+            Mark all read
+          </Button>
+        }
+      />
+      <Rule />
+
+      {boardError && (
+        <div className="mb-5 border-2 border-divider bg-brand/6 px-4 py-3 text-[13px]">
+          <span className="font-bold">The notice board could not be read.</span>{' '}
+          <span className="text-muted-foreground">
+            {notifications.length > 0
+              ? 'Notices from the office are missing; what is below comes from your own records.'
+              : 'Notices from the office are missing. Try again shortly.'}
+          </span>
+        </div>
+      )}
+
+      <SegmentedControl
+        name="notification-filter"
+        className="mb-5"
+        value={filter}
+        onChange={(value) => void setFilter(value === 'all' ? null : value)}
+        options={[
+          { value: 'all', label: 'All' },
+          { value: 'unread', label: 'Unread' },
+        ]}
+      />
+
+      {visible.length === 0 ? (
+        <div className="border-2 border-divider px-6 py-14 text-center">
+          <div className="font-heading text-[17px] font-extrabold">
+            Nothing to read
+          </div>
+          <p className="mt-2 text-[13.5px] text-muted-foreground">
+            You are up to date. New notifications appear here as they arrive.
+          </p>
+        </div>
+      ) : (
+        GROUPS.map((group) => {
+          const items = visible.filter((item) => item.group === group)
+          if (items.length === 0) return null
+          return (
+            <div key={group} className="mb-6">
+              <SectionHeading className="mb-2.5">{group}</SectionHeading>
+              <div className="border-t-2 border-divider">
+                {items.map((notification, index) => (
+                  <NotificationRow
+                    key={notification.id}
+                    notification={notification}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </div>
+          )
+        })
+      )}
+    </div>
+  )
+}

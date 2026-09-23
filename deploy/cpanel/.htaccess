@@ -1,0 +1,91 @@
+# NETPRO EMS — Apache / cPanel configuration
+# Place in the same folder as index.html (normally public_html).
+#
+# Rule order matters and is not arbitrary. In .htaccess, [L] restarts the
+# whole ruleset with the rewritten URI rather than stopping, so the API and
+# SPA rules use [END] (Apache 2.4+, which every cPanel host runs) to mean
+# what [L] looks like it means. Getting this wrong loops or silently skips
+# later blocks.
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # --- 0. Force https -----------------------------------------------------
+  # FIRST, or the [END] rules below would stop us ever reaching it.
+  # Comment out if TLS is terminated by a proxy in front of Apache.
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # --- 1. The API ---------------------------------------------------------
+  # The API is same-origin, served by Laravel from /backend on this same host,
+  # so there is nothing to proxy — the browser calls it directly.
+  #
+  # This rule exists to keep the SPA fallback below OFF it. Laravel's own
+  # .htaccess inside /backend already wins (a child .htaccess with its own
+  # RewriteEngine On overrides a parent's rules), so this is belt and braces —
+  # but if it ever stopped winning, every API call would silently come back as
+  # the app's own index.html, which fetch() would fail to parse with no clue
+  # as to why. Cheap insurance against an expensive afternoon.
+  RewriteRule ^backend(/.*)?$ - [END]
+
+  # --- 2. SPA fallback ----------------------------------------------------
+  # A real file or directory is served as itself.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [END]
+
+  # Everything else is a client-side route: hand it the shell.
+  RewriteRule ^ index.html [END]
+</IfModule>
+
+# --- 3. MIME types --------------------------------------------------------
+<IfModule mod_mime.c>
+  # Apache does not know this one, and without it the PWA will not install.
+  AddType application/manifest+json  .webmanifest
+  AddType application/wasm           .wasm
+  AddType font/woff2                 .woff2
+  AddType image/webp                 .webp
+  AddType image/svg+xml              .svg
+  AddType text/javascript            .js .mjs
+</IfModule>
+
+# --- 4. Caching -----------------------------------------------------------
+<IfModule mod_headers.c>
+  # Hashed filenames (assets/name-HASH.js) never change content. Cache hard.
+  <FilesMatch "-[A-Za-z0-9_-]{8,}\.(js|css|woff2|png|webp|svg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # The shell and the service worker must NEVER be cached, or a browser goes
+  # on serving an old build after a deploy and nothing can reach the user to
+  # tell them. This is the most important block in the file.
+  <FilesMatch "^(index\.html|sw\.js|workbox-[^/]*\.js|manifest\.webmanifest|registerSW\.js)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # --- Security headers ---
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  # HSTS: uncomment once the site is certainly https-only and will stay so.
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# --- 5. Compression -------------------------------------------------------
+# 437 JavaScript files. This is the difference between a ~6.5 MB and a ~1.6 MB
+# first load, which on a 3G link is minutes.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css
+  AddOutputFilterByType DEFLATE text/javascript application/javascript
+  AddOutputFilterByType DEFLATE application/json application/manifest+json
+  AddOutputFilterByType DEFLATE image/svg+xml
+  # Already compressed — do not waste CPU re-doing it.
+  SetEnvIfNoCase Request_URI \.(?:woff2|png|webp|jpg|gif|zip|gz)$ no-gzip dont-vary
+</IfModule>

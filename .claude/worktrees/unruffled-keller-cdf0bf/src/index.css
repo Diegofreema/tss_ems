@@ -1,0 +1,567 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/archivo';
+
+/* Dark mode is driven by the design system's own attribute, set on <html>. */
+@custom-variant dark (&:where([data-ems-theme="dark"], [data-ems-theme="dark"] *));
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Modernist tokens — ported from the Modernist design system's styles.css.
+   These raw values are the single source of truth; the shadcn semantic
+   names below are aliases onto them, so every shadcn primitive inherits
+   the design system without being restyled component by component.
+
+   Naming note: the design system calls its brand colour "accent", but shadcn
+   already uses --accent for subtle hover fills. The blue is `brand` here.
+   ───────────────────────────────────────────────────────────────────── */
+:root {
+  --ems-ground: #f2f2f4;
+  --ems-surface: #e9e9ec;
+  --ems-ink: #1c1d20;
+  --ems-brand: #156fb4;
+  --ems-divider: color-mix(in srgb, #1c1d20 40%, transparent);
+
+  --ems-neutral-100: #f4f5f8;
+  --ems-neutral-200: #e6e8ec;
+  --ems-neutral-300: #d2d4da;
+  --ems-neutral-400: #b5b8bf;
+  --ems-neutral-500: #96999f;
+  --ems-neutral-600: #787b81;
+  --ems-neutral-700: #5c5e63;
+  --ems-neutral-800: #404246;
+  --ems-neutral-900: #2a2c2f;
+
+  /* Ramp anchored on --ems-brand itself at the 600 step, so buttons and
+     headings draw from one hue instead of the two blues the old ramp mixed. */
+  --ems-brand-100: #eaf3fa;
+  --ems-brand-200: #d3e6f4;
+  --ems-brand-300: #a9cfe9;
+  --ems-brand-400: #6faed7;
+  --ems-brand-500: #3389c4;
+  --ems-brand-600: #156fb4;
+  --ems-brand-700: #10578d;
+  --ems-brand-800: #0d4269;
+  --ems-brand-900: #0b2e47;
+
+  /* Danger is the one colour added to the palette: destructive actions and
+     error states must not wear the brand blue. Split roles — `danger` is a
+     fill that carries white text, `danger-ink` is text/borders on the ground,
+     because no single red passes contrast in both jobs across both themes. */
+  --ems-danger: #b23b31;
+  --ems-danger-ink: #a63429;
+  --ems-danger-subtle: color-mix(in srgb, #b23b31 9%, transparent);
+
+  /* Shadows are reserved for card surfaces and floating layers; structure
+     still uses borders. Dark theme swaps these for deeper black shadows. */
+  --ems-shadow-card:
+    0 1px 2px rgb(16 24 40 / 0.05), 0 2px 6px rgb(16 24 40 / 0.04);
+  --ems-shadow-float:
+    0 4px 10px rgb(16 24 40 / 0.08), 0 14px 34px rgb(16 24 40 / 0.12);
+
+  /* Multiplier for every duration below — the design's `motion` prop / 6.
+       Set to 0 to disable animation entirely. */
+  --ems-motion: 1;
+}
+
+[data-ems-theme='dark'] {
+  --ems-ground: #15161a;
+  --ems-surface: #1f2126;
+  --ems-ink: #f2f2f4;
+  --ems-divider: color-mix(in srgb, #f2f2f4 34%, transparent);
+
+  --ems-neutral-100: #232529;
+  --ems-neutral-200: #2e3036;
+  --ems-neutral-300: #3e4046;
+  --ems-neutral-400: #53565c;
+  --ems-neutral-500: #797b81;
+  --ems-neutral-600: #9ea0a6;
+  --ems-neutral-700: #c2c4c8;
+  --ems-neutral-800: #e4e5e8;
+  --ems-neutral-900: #0c0d10;
+
+  --ems-brand-100: #10283c;
+  --ems-brand-200: #143855;
+  --ems-brand-600: #4f9fd9;
+  --ems-brand-700: #7db8e4;
+  --ems-brand-800: #b9d8ef;
+
+  --ems-danger: #c0473b;
+  --ems-danger-ink: #f08a7d;
+  --ems-danger-subtle: color-mix(in srgb, #f08a7d 12%, transparent);
+
+  --ems-shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 2px 8px rgb(0 0 0 / 0.3);
+  --ems-shadow-float:
+    0 6px 16px rgb(0 0 0 / 0.45), 0 18px 44px rgb(0 0 0 / 0.5);
+}
+
+/* shadcn semantic names, aliased onto the tokens above. */
+:root,
+[data-ems-theme='dark'] {
+  --background: var(--ems-ground);
+  --foreground: var(--ems-ink);
+  --card: var(--ems-surface);
+  --card-foreground: var(--ems-ink);
+  --popover: var(--ems-ground);
+  --popover-foreground: var(--ems-ink);
+  --primary: var(--ems-brand);
+  /* The brand blue is dark enough in both themes that its text is white in
+     both. Left as a literal rather than a --ems-* alias because every
+     ground token flips with the theme, and this must not. */
+  --primary-foreground: #fff;
+  --secondary: var(--ems-neutral-200);
+  --secondary-foreground: var(--ems-ink);
+  --muted: var(--ems-neutral-100);
+  --muted-foreground: color-mix(in srgb, var(--ems-ink) 55%, transparent);
+  --accent: var(--ems-neutral-200);
+  --accent-foreground: var(--ems-ink);
+  --destructive: var(--ems-danger);
+  --border: var(--ems-divider);
+  --input: var(--ems-divider);
+  --ring: var(--ems-brand);
+  --radius: 6px;
+}
+
+@theme inline {
+  --font-sans: 'Archivo Variable', system-ui, sans-serif;
+  --font-heading: 'Archivo Variable', system-ui, sans-serif;
+
+  --color-ground: var(--ems-ground);
+  --color-surface: var(--ems-surface);
+  --color-ink: var(--ems-ink);
+  --color-divider: var(--ems-divider);
+
+  --color-brand: var(--ems-brand);
+  --color-brand-100: var(--ems-brand-100);
+  --color-brand-200: var(--ems-brand-200);
+  --color-brand-300: var(--ems-brand-300);
+  --color-brand-400: var(--ems-brand-400);
+  --color-brand-500: var(--ems-brand-500);
+  --color-brand-600: var(--ems-brand-600);
+  --color-brand-700: var(--ems-brand-700);
+  --color-brand-800: var(--ems-brand-800);
+  --color-brand-900: var(--ems-brand-900);
+
+  /* Replaces Tailwind's stock neutral ramp with the design system's. */
+  --color-neutral-100: var(--ems-neutral-100);
+  --color-neutral-200: var(--ems-neutral-200);
+  --color-neutral-300: var(--ems-neutral-300);
+  --color-neutral-400: var(--ems-neutral-400);
+  --color-neutral-500: var(--ems-neutral-500);
+  --color-neutral-600: var(--ems-neutral-600);
+  --color-neutral-700: var(--ems-neutral-700);
+  --color-neutral-800: var(--ems-neutral-800);
+  --color-neutral-900: var(--ems-neutral-900);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Hybrid surface rule: radii soften what you touch (controls, cards,
+     floating layers); tables, tile strips and page rules stay sharp by
+     simply not using rounded-* classes. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 14px;
+  --radius-3xl: 18px;
+  --radius-4xl: 22px;
+
+  --color-danger: var(--ems-danger);
+  --color-danger-ink: var(--ems-danger-ink);
+  --color-danger-subtle: var(--ems-danger-subtle);
+
+  --shadow-card: var(--ems-shadow-card);
+  --shadow-float: var(--ems-shadow-float);
+
+  /* The house easing curve, as a utility (ease-ems). Same curve the
+     --animate-ems-* entries below already use. */
+  --ease-ems: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* Type scale. The stock Tailwind steps are re-tuned to this app's 15px
+     body so the ~240 hand-tuned text-[Npx] values can collapse onto them:
+     2xs absorbs 10.5–11.5, xs absorbs 12–12.5, sm absorbs 13–14. */
+  --text-2xs: 11px;
+  --text-2xs--line-height: 1.4;
+  --text-sm: 13.5px;
+  --text-sm--line-height: 1.5;
+  --text-base: 15px;
+  --text-base--line-height: 1.55;
+
+  /* Fluid type — the design scales these rather than switching at a breakpoint. */
+  --text-page-title: clamp(23px, 6.2vw, 30px);
+  --text-detail-title: clamp(25px, 7vw, 34px);
+  --text-receipt: clamp(30px, 9vw, 40px);
+  --text-numeral: clamp(64px, 18vw, 96px);
+  --text-stat: clamp(24px, 6vw, 30px);
+  --spacing-content: clamp(14px, 4vw, 24px);
+
+  --animate-ems-up: emsUp calc(340ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  --animate-ems-in: emsIn calc(340ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  --animate-ems-row: emsRow calc(260ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  --animate-ems-grow: emsGrow calc(520ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  --animate-ems-bar: emsBar calc(600ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  --animate-ems-pop: emsPop calc(220ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  --animate-ems-fade: emsFade calc(180ms * var(--ems-motion)) ease both;
+  --animate-ems-toast: emsToast calc(260ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  --animate-ems-shimmer: emsShimmer calc(1200ms * var(--ems-motion)) linear
+    infinite;
+  --animate-ems-shake: emsShake calc(420ms * var(--ems-motion)) both;
+  --animate-ems-spin: emsSpin 800ms linear infinite;
+
+  /* The narrow-viewport sidebar drawer sliding in from its own edge. */
+  --animate-ems-drawer: emsDrawer calc(280ms * var(--ems-motion))
+    cubic-bezier(0.2, 0.7, 0.3, 1) both;
+
+  /* Landing page only: a strip that never stops, and a cursor-square blink. */
+  --animate-ems-marquee: emsMarquee calc(38s * var(--ems-motion)) linear
+    infinite;
+  --animate-ems-blink: emsBlink calc(2.4s * var(--ems-motion)) steps(1, end)
+    infinite;
+}
+
+@keyframes emsUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes emsIn {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes emsRow {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes emsGrow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes emsBar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes emsPop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes emsFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes emsToast {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes emsShimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@keyframes emsShake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  30%,
+  70% {
+    transform: translateX(3px);
+  }
+  50% {
+    transform: translateX(-3px);
+  }
+}
+@keyframes emsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes emsDrawer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes emsMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes emsBlink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    /* `clip` rather than `hidden`: hiding an overflow makes the body a
+           scroll container, and the landing page's sticky header would then
+           have nothing to stick to. */
+    overflow-x: clip;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
+
+  /* Anchors styled as buttons keep the button's own colour. */
+  a:not([class*='btn']) {
+    color: var(--ems-brand);
+  }
+
+  [data-ems-theme='dark'] a:not([class*='btn']) {
+    color: var(--ems-brand-700);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ems-brand);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--ems-brand) 30%, transparent);
+  }
+}
+
+/* Rich text — what the topic editor writes and what the record page reads
+   back. One block for both, so a heading is the same size on the page as it
+   was in the form. Tailwind's reset strips lists and quotes of everything, so
+   these are put back by hand rather than pulled from a typography plugin. */
+.rich-text {
+  line-height: 1.6;
+}
+
+.rich-text > * + * {
+  margin-top: 0.7em;
+}
+
+.rich-text h2 {
+  font-size: 1.35em;
+}
+
+.rich-text h3 {
+  font-size: 1.15em;
+}
+
+.rich-text h4 {
+  font-size: 1em;
+  letter-spacing: 0.01em;
+}
+
+.rich-text h2,
+.rich-text h3,
+.rich-text h4 {
+  margin-top: 1.2em;
+}
+
+.rich-text > :first-child {
+  margin-top: 0;
+}
+
+.rich-text ul,
+.rich-text ol {
+  padding-left: 1.35em;
+}
+
+.rich-text ul {
+  list-style: disc;
+}
+
+.rich-text ol {
+  list-style: decimal;
+}
+
+.rich-text li + li {
+  margin-top: 0.25em;
+}
+
+.rich-text li > p {
+  margin: 0;
+}
+
+.rich-text blockquote {
+  border-left: 2px solid var(--ems-brand);
+  padding-left: 0.85em;
+  color: var(--muted-foreground);
+}
+
+.rich-text code {
+  background: var(--muted);
+  border-radius: 4px;
+  padding: 0.1em 0.32em;
+  font-size: 0.9em;
+}
+
+.rich-text pre {
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 0.7em 0.85em;
+  overflow-x: auto;
+}
+
+.rich-text pre code {
+  background: none;
+  padding: 0;
+}
+
+.rich-text hr {
+  border: 0;
+  border-top: 2px solid var(--ems-divider);
+  margin: 1.2em 0;
+}
+
+.rich-text a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The prompt inside an empty editor. Drawn rather than typed, so it never
+   becomes content the school has to delete. */
+.rich-text p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Touch targets — the one media query the design carries. Controls grow to
+   44px and inputs to 16px, which also stops iOS zooming on focus. */
+@media (max-width: 640px) {
+  [data-slot='button'],
+  [data-slot='select-trigger'],
+  [data-slot='seg-option'] {
+    min-height: 44px;
+  }
+
+  [data-slot='input'],
+  [data-slot='textarea'],
+  [data-slot='select-trigger'] {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
+/* Printing. Only the fee-collection receipt is meant to reach paper: a parent
+   is handed the slip, not a screenshot of the app around it. Everything else
+   is hidden rather than the slip being lifted out of the layout, so it keeps
+   the dividers and type it was designed with. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  [data-slot='receipt'],
+  [data-slot='receipt'] * {
+    visibility: visible;
+  }
+
+  [data-slot='receipt'] {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    border: 0;
+  }
+
+  [data-print-hide] {
+    display: none !important;
+  }
+}

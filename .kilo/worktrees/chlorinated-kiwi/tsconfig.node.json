@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "es2023",
+    // The tests reach the API client, which is browser code: it reads
+    // `import.meta.env` and, in a browser, `location`. Without these the one
+    // seam worth pinning — what this portal actually puts on the wire — cannot
+    // be type-checked at all.
+    "lib": ["ES2023", "DOM"],
+    "types": ["node", "vite/client"],
+    "paths": { "@/*": ["./src/*"] },
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "module": "nodenext",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts", "src/**/*.test.ts"]
+}
