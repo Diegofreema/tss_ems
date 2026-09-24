@@ -1,7 +1,8 @@
 import { noteServerTime } from '../lib/server-clock.ts'
+import { readEnvelope } from './envelope.ts'
 import { getToken } from './token.ts'
 import { buildUrl, type QueryValue } from './url.ts'
-import type { ApiEnvelope, ApiFieldErrors } from './types.ts'
+import type { ApiFieldErrors } from './types.ts'
 
 export { paginated } from './url.ts'
 export type { QueryValue }
@@ -102,10 +103,20 @@ export async function request<TData>(
   // countdown is measured against. See `lib/server-clock`.
   noteServerTime(response.headers.get('Date'))
 
-  const payload = (await response.json().catch(() => null)) as ApiEnvelope<TData> | null
+  // Read as text and searched, not `response.json()`: the school's server can
+  // print PHP warnings in front of the envelope. See `readEnvelope`.
+  const payload = readEnvelope<TData>(await response.text().catch(() => ''))
 
   if (!payload) {
-    throw new ApiError(response.status, response.statusText || 'The server sent nothing back.')
+    // A 2xx is the school saying it did the thing, whatever the body failed to
+    // say — so this must not read as "try again", which is how a saved
+    // enrolment gets sent twice. `classify` holds a 2xx as terminal.
+    throw new ApiError(
+      response.status,
+      response.ok
+        ? 'The school took this, but its answer could not be read. Check the record before sending it again.'
+        : response.statusText || 'The server sent nothing back.',
+    )
   }
   if (!payload.success) {
     throw new ApiError(response.status, payload.message, payload.errors)
@@ -132,7 +143,7 @@ export async function requestBlob(
   if (!response.ok) {
     // A refusal comes back as the ordinary envelope even here, so the reason
     // the API gave is what the toast says — not the bare HTTP status line.
-    const refusal = (await response.json().catch(() => null)) as ApiEnvelope<never> | null
+    const refusal = readEnvelope<never>(await response.text().catch(() => ''))
     throw new ApiError(
       response.status,
       refusal?.message || response.statusText || 'That file could not be downloaded.',

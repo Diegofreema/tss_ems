@@ -45,6 +45,10 @@ export function classify(error: unknown): Verdict {
 
   if (error instanceof ApiError) {
     if (error.status === 401) return 'auth'
+    // The school answered 2xx and `request()` still could not read the reply.
+    // It did the work — sending it again is a second enrolment, or a 409
+    // over the first one. Measured on `POST /students`: see `readEnvelope`.
+    if (error.status >= 200 && error.status < 300) return 'terminal'
     if (RETRYABLE_STATUS.has(error.status)) return 'retryable'
     // A 4xx the server has explained. Asking again gets the same explanation.
     if (error.status >= 400 && error.status < 500) return 'terminal'

@@ -35,6 +35,14 @@ test('the school being unwell is temporary; the school saying no is not', () => 
   }
 })
 
+test('a 2xx the client could not read is work the school already did', () => {
+  // `POST /students` answered 200 behind a PHP warning and saved the student;
+  // replaying it was refused 409 over the copy it had just made — and with no
+  // email to collide on, would have been a second enrolment.
+  assert.equal(classify(new ApiError(200, 'unreadable')), 'terminal')
+  assert.equal(classify(new ApiError(201, 'unreadable')), 'terminal')
+})
+
 test('a failure with no story to tell is not replayed forever', () => {
   assert.equal(classify(new Error('something')), 'terminal')
   assert.equal(classify('a string'), 'terminal')
