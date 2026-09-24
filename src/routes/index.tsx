@@ -1,25 +1,16 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { installedApp } from '@/features/auth/installed'
-import { LandingPage } from '@/features/landing/landing-page'
 
+/*
+ * There is no front page: the first thing a visitor sees is the sign-in form.
+ *
+ * Somebody signed in is sent on from there to their own portal by the sign-in
+ * route's own guard, so `/` is one answer for everybody — a link back to the
+ * root inside the app, an old bookmark to the landing page that used to be
+ * here, and the address typed bare. A family that is not a user yet finds
+ * Apply on that form.
+ */
 export const Route = createFileRoute('/')({
-  /*
-   * The installed app has no shopfront.
-   *
-   * Somebody who tapped the icon on their home screen is not deciding whether
-   * to use the portal — they are trying to reach a register, a result or a
-   * bill, and a page of prose with the Sign in button at the end of it is in
-   * the way. The manifest sends new installs straight to the form; this is
-   * what does the same for every phone the app is already on, whose
-   * `start_url` was fixed at install time and cannot be changed from here.
-   *
-   * It is not only the first screen: a link back to `/` inside the app lands
-   * here too, and the answer is the same either way. Signed in, the sign-in
-   * route sends them on to their own portal, so the redirect costs a tap of
-   * nothing and never shows a form to somebody who does not need one.
-   */
   beforeLoad: () => {
-    if (installedApp()) throw redirect({ to: '/sign-in' })
+    throw redirect({ to: '/sign-in', replace: true })
   },
-  component: LandingPage,
 })

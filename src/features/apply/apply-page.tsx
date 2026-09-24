@@ -134,7 +134,7 @@ export function ApplyPage() {
     <div className="min-h-dvh bg-ground text-foreground">
       <header className="sticky top-0 z-30 border-b border-divider bg-[color-mix(in_srgb,var(--ems-ground)_88%,transparent)] backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-280 items-center gap-4 px-content py-3">
-          <Link to="/" aria-label="Home">
+          <Link to="/sign-in" aria-label="Back to sign in">
             <img src="/netpro-logo.webp" alt="netpro" className="h-7 w-auto" />
           </Link>
           <div className="ml-auto flex items-center gap-3 text-sm">
@@ -267,7 +267,7 @@ function Sent({ child, reach }: { child: string; reach: string }) {
         family at <span className="font-semibold text-foreground">{reach}</span>.
       </p>
       <Button asChild variant="outline" className="mt-6">
-        <Link to="/">Back to the home page</Link>
+        <Link to="/sign-in">Back to sign in</Link>
       </Button>
     </Panel>
   )

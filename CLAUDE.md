@@ -43,7 +43,7 @@ visibly not one.
   and strands the route loader waiting on `preload()`. Read another set's snapshot, or call the
   service directly.
 - Collections sync lazily, and **an explicit `preload()` is the only thing relied on to start
-  them**. Importing the module does not, or a signed-out visitor on the landing page would fire the
+  them**. Importing the module does not, or a signed-out visitor on the sign-in page would fire the
   parent portal's requests. Whether a live query alone starts one has been claimed both ways — the
   library's docs say it does, an afternoon's measurement here said it did not — so nothing bets a
   register on it: every portal shell preloads its own sets fire-and-forget, the assignment routes
@@ -760,7 +760,7 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   dashboard were two cards 476px wide, and at 1281 they were four. So the content column carries
   `@container/page` and pages query _it_ (`@3xl/page:grid-cols-…`); a strip of equal things skips
   the query and asks for `repeat(auto-fit, minmax(…))`, which has no edge to fall off. Keep viewport
-  breakpoints for what genuinely fills the window — the landing page, the sign-in split, a dialog.
+  breakpoints for what genuinely fills the window — the apply page, the sign-in split, a dialog.
   Type is left alone on this axis: the portal reads at 15px with 24px titles, and the fix for a
   crowded 14-inch screen is the chrome around the words, not smaller words.
 - **A tab whose rows are prose is panels, not a table.** `DetailTab.accordion` names the row keys —

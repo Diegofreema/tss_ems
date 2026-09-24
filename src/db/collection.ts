@@ -28,7 +28,7 @@ export type SchoolCollectionSpec<T extends object, K extends string | number> = 
    * Sync as soon as this module is imported, rather than when a screen asks.
    *
    * Off by default, and it matters: a collection is a module constant, so
-   * eager sync means a signed-out visitor on the landing page fires the
+   * eager sync means a signed-out visitor on the sign-in page fires the
    * parent portal's three requests — and a teacher pays for the admin
    * portal's. An explicit `preload()` is what starts one — the shell loaders,
    * the assignment routes and `useCollectionRows` all call it. Whether a live

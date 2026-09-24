@@ -501,12 +501,6 @@
     cubic-bezier(0.2, 0.7, 0.3, 1) both;
   --animate-ems-drawer: emsDrawer calc(280ms * var(--ems-motion))
     cubic-bezier(0.2, 0.7, 0.3, 1) both;
-
-  /* Landing page only: a strip that never stops, and a cursor-square blink. */
-  --animate-ems-marquee: emsMarquee calc(38s * var(--ems-motion)) linear
-    infinite;
-  --animate-ems-blink: emsBlink calc(2.4s * var(--ems-motion)) steps(1, end)
-    infinite;
 }
 
 @keyframes emsUp {
@@ -657,24 +651,6 @@
     transform: none;
   }
 }
-@keyframes emsMarquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-@keyframes emsBlink {
-  0%,
-  60% {
-    opacity: 1;
-  }
-  61%,
-  100% {
-    opacity: 0.15;
-  }
-}
 
 @layer base {
   * {
@@ -689,7 +665,7 @@
     @apply bg-background text-foreground;
     margin: 0;
     /* `clip` rather than `hidden`: hiding an overflow makes the body a
-           scroll container, and the landing page's sticky header would then
+           scroll container, and the apply page's sticky header would then
            have nothing to stick to. */
     overflow-x: clip;
     font-size: 15px;

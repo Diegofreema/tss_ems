@@ -11,7 +11,7 @@ import { errorMessage, OFFLINE_MESSAGE } from '@/lib/errors';
 import { endSession } from '@/stores/session.store';
 import { useAuthStore } from '../auth.store';
 import { AuthAlert } from '../components/auth-alert';
-import { authButton } from '../components/auth-button';
+import { authButton, authButtonQuiet } from '../components/auth-button';
 import { AuthField, AuthPasswordField } from '../components/auth-field';
 import { AuthHeading } from '../components/auth-heading';
 import {
@@ -180,6 +180,17 @@ export function SignInScreen() {
           </Button>
         </form>
       </FormProvider>
+
+      {/* The one door in for a family that has no account yet — the portal
+          has no front page, so the sign-in form is where they arrive. */}
+      <div className="mt-(--auth-gap) flex flex-col gap-3 border-t border-ui-hint/30 pt-(--auth-gap)">
+        <p className="text-center text-base text-ui-muted">
+          New to the school?
+        </p>
+        <Button asChild variant="outline" className={authButtonQuiet}>
+          <Link to="/apply">Apply for admission</Link>
+        </Button>
+      </div>
     </>
   );
 }
