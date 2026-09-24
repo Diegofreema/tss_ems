@@ -2,6 +2,7 @@ import { paginated, request } from '../client'
 import type { Id } from '../types'
 import type { Invoice } from '../invoices/types'
 import type {
+  ApplicationBody,
   PromoteStudentsBody,
   SetStudentStatusBody,
   Student,
@@ -26,6 +27,14 @@ export const studentsService = {
     request<{ applicants: Student[] }>('students/applicants', {
       query: { session_id: sessionId },
     }).then((data) => data.applicants),
+
+  /**
+   * A family's application for a place. Public — nobody applying has an
+   * account — and it lands as a student at `status: 'Applied'`, which is what
+   * `applicants` above reads back for the office.
+   */
+  apply: (body: ApplicationBody) =>
+    request<unknown>('students/apply', { method: 'POST', body }),
 
   get: (id: Id) => request<{ student: Student }>(`students/${id}`).then((data) => data.student),
 

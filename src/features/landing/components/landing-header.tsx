@@ -40,6 +40,9 @@ export function LandingHeader() {
           ))}
 
           <Button asChild variant="outline" className="h-11 px-4">
+            <Link to="/apply">Apply</Link>
+          </Button>
+          <Button asChild variant="outline" className="h-11 px-4">
             <Link to="/sign-in">Sign in</Link>
           </Button>
           <Button asChild className="h-11 px-4.5">

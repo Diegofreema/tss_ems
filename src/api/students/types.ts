@@ -164,3 +164,37 @@ export type StudentResultParams = {
 }
 
 export type StudentResult = Record<string, unknown>
+
+/**
+ * A family applying for a place, as `POST /students/apply` takes it — keys
+ * spelt the endpoint's way (`pschools`, `pemailaddress`). The applicant names
+ * no class: `department_id` goes empty, and the office chooses the class when
+ * it admits them from Applicants.
+ */
+export type ApplicationBody = {
+  fname: string
+  lname: string
+  /** Empty where there is none — the endpoint takes `""`, as its sample does. */
+  mname: string
+  /** `yyyy-MM-dd`. */
+  dob: string
+  gender: 'Male' | 'Female'
+  address: string
+  phone: string
+  department_id: ''
+  /** The school's own numbering; both left off where no state was chosen. */
+  state_id?: number
+  country_id?: number
+  /** The primary school the child is coming from. */
+  pschools: string
+  religion: string
+  email: string
+  fathersname: string
+  mothersname: string
+  fatherphone: string
+  motherphone: string
+  fathersjob: string
+  mothersjob: string
+  /** The family's email, which the office replies to. */
+  pemailaddress: string
+}
