@@ -1,26 +1,33 @@
 import { Pencil } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
+import { useApplyingClasses } from '@/api/departments/hooks'
+import { useCountries, useLgas, useStates } from '@/api/places/hooks'
 import { Button } from '@/components/ui/button'
+import type { Option } from '@/features/collections/options'
 import { formatDate } from '@/lib/format'
 import { LABELS, STEPS, type ApplicationField, type ApplicationValues } from '../schema'
-import { useStates } from '../use-states'
 
 /**
  * The whole application read back, a step to a card, each with a way into the
- * step that asked it. The state is read back by its name — nobody recognises
- * Imo as 2663.
+ * step that asked it. The class and the places are read back by their names —
+ * nobody recognises JSS I as 1, or Imo as 2663.
  */
 export function Review({ onEdit }: { onEdit: (step: number) => void }) {
   const { getValues } = useFormContext<ApplicationValues>()
   const values = getValues()
-  const states = useStates()
+  // The same queries the dropdowns ran, so these are already answered.
+  const named: Partial<Record<ApplicationField, readonly Option[] | undefined>> = {
+    department_id: useApplyingClasses().data,
+    country_id: useCountries().data?.options,
+    state_id: useStates(values.country_id).data,
+    lga_id: useLgas(values.state_id).data,
+  }
 
   const answer = (field: ApplicationField) => {
     const value = values[field]
     if (value instanceof Date) return formatDate(value)
-    if (field === 'state_id' && value) {
-      return states.data?.find((state) => state.value === value)?.label ?? value
-    }
+    const list = named[field]
+    if (list && value) return list.find((option) => option.value === value)?.label ?? value
     return typeof value === 'string' && value.trim() ? value.trim() : undefined
   }
 

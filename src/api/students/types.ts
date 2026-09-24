@@ -167,9 +167,7 @@ export type StudentResult = Record<string, unknown>
 
 /**
  * A family applying for a place, as `POST /students/apply` takes it — keys
- * spelt the endpoint's way (`pschools`, `pemailaddress`). The applicant names
- * no class: `department_id` goes empty, and the office chooses the class when
- * it admits them from Applicants.
+ * spelt the endpoint's way (`pschools`, `pemailaddress`).
  */
 export type ApplicationBody = {
   fname: string
@@ -181,10 +179,19 @@ export type ApplicationBody = {
   gender: 'Male' | 'Female'
   address: string
   phone: string
-  department_id: ''
-  /** The school's own numbering; both left off where no state was chosen. */
-  state_id?: number
-  country_id?: number
+  /**
+   * The class applied for, off `GET /departments`. Required: the endpoint
+   * refuses without it — "Please give the class being applied for".
+   */
+  department_id: number
+  /**
+   * The school's own ids, off `GET /countries`, `/states` and `/lgas`. The
+   * state is required (NOT NULL on the backend); the LGA is nullable, and goes
+   * as null where the family did not choose one.
+   */
+  country_id: number
+  state_id: number
+  lga_id: number | null
   /** The primary school the child is coming from. */
   pschools: string
   religion: string

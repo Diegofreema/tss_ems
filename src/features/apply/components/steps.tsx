@@ -1,10 +1,13 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import { useFormContext, useWatch } from 'react-hook-form'
+import { useApplyingClasses } from '@/api/departments/hooks'
+import { useCountries, useLgas, useStates } from '@/api/places/hooks'
 import { DateField } from '@/components/form/date-field'
 import { SelectField } from '@/components/form/select-field'
 import { TextField } from '@/components/form/text-field'
 import { RELIGIONS } from '@/portals/admin/collections/student-row'
 import { LABELS, type ApplicationField, type ApplicationValues } from '../schema'
-import { useStates } from '../use-states'
+import { FetchedSelect } from './fetched-select'
 import { Review } from './review'
 
 const GENDERS = [
@@ -42,6 +45,7 @@ function Text({
 function Child() {
   return (
     <Grid>
+      <ClassChoice />
       <Text name="fname" />
       <Text name="mname" optional />
       <Text name="lname" />
@@ -69,8 +73,31 @@ function Child() {
   )
 }
 
+/**
+ * The class applied for. Asked of the school every time the form opens — see
+ * `useApplyingClasses` — because a class opened or closed this morning is what
+ * a stale copy would get wrong.
+ */
+function ClassChoice() {
+  return <FetchedSelect name="department_id" list={useApplyingClasses()} required span="full" />
+}
+
 function Home() {
-  const states = useStates()
+  const { control, getValues, setValue } = useFormContext<ApplicationValues>()
+  const [country, state] = useWatch({ control, name: ['country_id', 'state_id'] })
+  const countries = useCountries()
+  const states = useStates(country)
+  const lgas = useLgas(state)
+
+  // The school's own country until the family says otherwise, off the answer
+  // itself (`home_country_id`) rather than a number written here — most
+  // applicants are local, and a form that makes them find their country among
+  // 247 before it offers a state is a form nobody finishes.
+  const home = countries.data?.home
+  useEffect(() => {
+    if (home && !getValues('country_id')) setValue('country_id', home)
+  }, [home, getValues, setValue])
+
   return (
     <Grid>
       <Text name="address" span="full" placeholder="House number, street and town" />
@@ -80,12 +107,22 @@ function Home() {
         placeholder="0803 123 4567"
         hint="The number the school calls first."
       />
-      <SelectField<ApplicationValues>
+      <FetchedSelect
+        name="country_id"
+        list={{ ...countries, data: countries.data?.options }}
+        required
+      />
+      <FetchedSelect
         name="state_id"
-        label={LABELS.state_id}
-        options={states.data ?? []}
-        placeholder={states.isPending ? 'Loading…' : 'Choose a state'}
-        hint="Leave empty if the family is not from Nigeria."
+        list={states}
+        waitingFor={country ? undefined : 'Choose a country first'}
+        required
+      />
+      <FetchedSelect
+        name="lga_id"
+        list={lgas}
+        waitingFor={state ? undefined : 'Choose a state first'}
+        hint="Optional."
       />
       <Text
         name="email"

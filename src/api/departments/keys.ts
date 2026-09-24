@@ -11,4 +11,6 @@ export const departmentKeys = {
   subjects: (id: Id) => [...departmentKeys.detail(id), 'subjects'] as const,
   classArms: (id: Id) => [...departmentKeys.detail(id), 'class-arms'] as const,
   classes: () => [...departmentKeys.all, 'classes'] as const,
+  /** What a signed-out applicant is offered — kept apart from the office's own list. */
+  applying: () => [...departmentKeys.all, 'applying'] as const,
 }

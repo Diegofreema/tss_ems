@@ -5,6 +5,7 @@ import { applicationSchema, type ApplicationValues } from './schema.ts'
 
 /** The sample body on record, as the form would hold it. */
 const SAMPLE: ApplicationValues = {
+  department_id: '1',
   fname: 'Chidi',
   lname: 'Okafor',
   mname: 'Ebuka',
@@ -12,7 +13,9 @@ const SAMPLE: ApplicationValues = {
   gender: 'Male',
   address: '14 Douglas Road, Owerri',
   phone: '08031234567',
+  country_id: '160',
   state_id: '2648',
+  lga_id: '771',
   pschools: 'Sunrise Primary School',
   religion: 'Christian',
   email: '',
@@ -34,9 +37,10 @@ test('the sample comes out as the body the endpoint was shown', () => {
     gender: 'Male',
     address: '14 Douglas Road, Owerri',
     phone: '08031234567',
-    department_id: '',
-    state_id: 2648,
+    department_id: 1,
     country_id: 160,
+    state_id: 2648,
+    lga_id: 771,
     pschools: 'Sunrise Primary School',
     religion: 'Christian',
     email: '',
@@ -55,10 +59,14 @@ test('the sample passes the schema, so the form accepts what the endpoint was sh
   assert.equal(result.success, true, JSON.stringify(result.error?.issues))
 })
 
-test('no state sends no country either', () => {
-  const body = applicationBody({ ...SAMPLE, state_id: '' })
-  assert.equal('state_id' in body, false)
-  assert.equal('country_id' in body, false)
+test('no LGA is sent as null, which the nullable column takes', () => {
+  assert.equal(applicationBody({ ...SAMPLE, lga_id: '' }).lga_id, null)
+})
+
+test('a family from elsewhere is sent with their own country', () => {
+  const body = applicationBody({ ...SAMPLE, country_id: '83', state_id: '1405', lga_id: '' })
+  assert.equal(body.country_id, 83)
+  assert.equal(body.state_id, 1405)
 })
 
 test('a birthday is the calendar day chosen, whatever UTC makes of it', () => {

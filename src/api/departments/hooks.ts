@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { namedOptions } from '../named-options'
 import { dropCurriculumReads } from '../curriculum'
 import type { Id } from '../types'
 import { departmentKeys } from './keys'
@@ -114,5 +115,30 @@ export function useClasses() {
     queryKey: departmentKeys.classes(),
     queryFn: () => departmentsService.classes(),
     staleTime: Infinity,
+  })
+}
+
+/**
+ * The classes a family can apply into, off `GET /departments` — which answers
+ * without a token, so the application form can ask before anybody has an
+ * account.
+ *
+ * A plain `useQuery`, and the exception is deliberate: the collections that
+ * hold the school's classes (`refClasses`) belong to a signed-in session and
+ * are wiped at sign-out, and a signed-out visitor must never start one.
+ *
+ * Asked every time the form opens (`staleTime: 0`), for the reason the office's
+ * own class feeds are `ALWAYS_ASK`: a class opened or closed this morning is
+ * the thing a stale copy would get wrong, on a form that looks complete.
+ * `networkMode: 'always'` so that offline it fails and the field says so,
+ * rather than pausing on "Loading…" for as long as the connection is down.
+ */
+export function useApplyingClasses() {
+  return useQuery({
+    queryKey: departmentKeys.applying(),
+    queryFn: async () => namedOptions((await departmentsService.list({ limit: 200 })).items),
+    staleTime: 0,
+    networkMode: 'always',
+    retry: 1,
   })
 }

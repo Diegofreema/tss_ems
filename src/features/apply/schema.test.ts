@@ -5,6 +5,7 @@ import { applicationSchema, DRAFT_FIELDS, STEPS, stepOf, type ApplicationValues 
 const fields = Object.keys(applicationSchema.shape)
 
 const VALID: ApplicationValues = {
+  department_id: '1',
   fname: 'Chidi',
   lname: 'Okafor',
   mname: '',
@@ -15,7 +16,9 @@ const VALID: ApplicationValues = {
   address: '14 Douglas Road, Owerri',
   phone: '08031234567',
   email: '',
-  state_id: '',
+  country_id: '160',
+  state_id: '2648',
+  lga_id: '',
   fathersname: 'Emeka Okafor',
   fatherphone: '08031111111',
   fathersjob: '',
@@ -45,7 +48,8 @@ test('a refused field sends the reader back to its own step', () => {
   assert.equal(stepOf('fname'), 0)
   assert.equal(stepOf('state_id'), 1)
   assert.equal(stepOf('pemailaddress'), 2)
-  assert.equal(stepOf('department_id'), STEPS.length - 1)
+  assert.equal(stepOf('department_id'), 0)
+  assert.equal(stepOf('something_else'), STEPS.length - 1)
 })
 
 test('one parent is enough — a family with a single parent can apply', () => {
@@ -82,4 +86,14 @@ test('emails are optional, and addresses when given', () => {
 test('religion is one of the office’s own four words', () => {
   assert.deepEqual(refused({ religion: 'Muslim' }), [])
   assert.deepEqual(refused({ religion: 'Christianity' as never }), ['religion'])
+})
+
+test('the class is required — the endpoint refuses an application without one', () => {
+  assert.deepEqual(refused({ department_id: '' }), ['department_id'])
+})
+
+test('a state is required and an LGA is not — the backend holds state_id NOT NULL', () => {
+  assert.deepEqual(refused({ state_id: '' }), ['state_id'])
+  assert.deepEqual(refused({ country_id: '' }), ['country_id'])
+  assert.deepEqual(refused({ lga_id: '' }), [])
 })

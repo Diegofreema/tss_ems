@@ -31,6 +31,7 @@ const parentPhone = optional.refine(
 export const applicationSchema = z
   .object({
     // The child
+    department_id: z.string().min(1, 'Choose the class your child is applying for'),
     fname: required('their first name'),
     mname: optional,
     lname: required('their surname'),
@@ -47,7 +48,12 @@ export const applicationSchema = z
     address: required('the home address'),
     phone: phone('a phone number'),
     email,
-    state_id: optional,
+    // The school's own ids, off its public lists. A state is required — the
+    // backend holds `students.state_id` NOT NULL — and the LGA is the one of
+    // the three that may be left empty.
+    country_id: z.string().min(1, 'Choose a country'),
+    state_id: z.string().min(1, 'Choose a state'),
+    lga_id: optional,
 
     // Parents
     fathersname: optional,
@@ -91,6 +97,7 @@ export type ApplicationField = keyof ApplicationValues
 
 /** Each field's label, shared by the step that asks and the review that reads back. */
 export const LABELS: Record<ApplicationField, string> = {
+  department_id: 'Class applying for',
   fname: 'First name',
   mname: 'Middle name',
   lname: 'Surname',
@@ -101,7 +108,9 @@ export const LABELS: Record<ApplicationField, string> = {
   address: 'Home address',
   phone: 'Phone number',
   email: "Child's email",
+  country_id: 'Country',
   state_id: 'State of origin',
+  lga_id: 'LGA',
   fathersname: "Father's name",
   fatherphone: "Father's phone",
   fathersjob: "Father's occupation",
@@ -128,14 +137,14 @@ export const STEPS: readonly ApplicationStep[] = [
   {
     id: 'child',
     title: 'About the child',
-    blurb: 'The child applying, as their name appears on their birth certificate.',
-    fields: ['fname', 'mname', 'lname', 'gender', 'dob', 'religion', 'pschools'],
+    blurb: 'The class they are applying for, and their name as it appears on their birth certificate.',
+    fields: ['department_id', 'fname', 'mname', 'lname', 'gender', 'dob', 'religion', 'pschools'],
   },
   {
     id: 'home',
     title: 'Home',
     blurb: 'Where the family lives, and how the school reaches it.',
-    fields: ['address', 'phone', 'email', 'state_id'],
+    fields: ['address', 'phone', 'country_id', 'state_id', 'lga_id', 'email'],
   },
   {
     id: 'parents',
@@ -169,6 +178,7 @@ export function stepOf(field: string): number {
 export const DRAFT_FIELDS: readonly ApplicationField[] = STEPS.flatMap((step) => step.fields)
 
 export const EMPTY_APPLICATION: Partial<ApplicationValues> = {
+  department_id: '',
   fname: '',
   mname: '',
   lname: '',
@@ -176,7 +186,9 @@ export const EMPTY_APPLICATION: Partial<ApplicationValues> = {
   address: '',
   phone: '',
   email: '',
+  country_id: '',
   state_id: '',
+  lga_id: '',
   fathersname: '',
   fatherphone: '',
   fathersjob: '',
