@@ -1,5 +1,6 @@
 // Relative imports only, so `node --test` can load this — see CLAUDE.md.
 import { z } from 'zod'
+import { DOCUMENT_MAX_BYTES, tooLargeMessage } from '../../lib/file-size.ts'
 import { RELIGIONS } from '../../portals/admin/collections/student-row.ts'
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
@@ -27,6 +28,20 @@ const parentPhone = optional.refine(
   (value) => value === '' || isPhone(value),
   'That does not look like a phone number',
 )
+
+/**
+ * A document the family may attach: optional, and no larger than the school
+ * takes. Checked here as well as where it lands, so a file that got past the
+ * drop zone is still named in its own size.
+ */
+const document = z
+  .instanceof(File)
+  .superRefine((file, context) => {
+    if (file.size > DOCUMENT_MAX_BYTES) {
+      context.addIssue({ code: 'custom', message: tooLargeMessage(file.size, DOCUMENT_MAX_BYTES) })
+    }
+  })
+  .optional()
 
 export const applicationSchema = z
   .object({
@@ -63,6 +78,12 @@ export const applicationSchema = z
     motherphone: parentPhone,
     mothersjob: optional,
     pemailaddress: email,
+
+    // Documents, each optional — the same three the office attaches at
+    // enrolment, under the same names.
+    passport: document,
+    birth_certificate: document,
+    other_certificates: document,
   })
   /*
    * At least one parent, and a way to reach whoever is named. Not both:
@@ -118,6 +139,17 @@ export const LABELS: Record<ApplicationField, string> = {
   motherphone: "Mother's phone",
   mothersjob: "Mother's occupation",
   pemailaddress: 'Family email',
+  passport: 'Passport photograph',
+  birth_certificate: 'Birth certificate',
+  other_certificates: 'Other certificates',
+}
+
+/** The fields that hold a file rather than typed text. */
+export const DOCUMENT_FIELDS = ['passport', 'birth_certificate', 'other_certificates'] as const
+export type DocumentField = (typeof DOCUMENT_FIELDS)[number]
+
+export function isDocumentField(field: string): field is DocumentField {
+  return (DOCUMENT_FIELDS as readonly string[]).includes(field)
 }
 
 export type ApplicationStep = {
@@ -161,6 +193,12 @@ export const STEPS: readonly ApplicationStep[] = [
     ],
   },
   {
+    id: 'documents',
+    title: 'Documents',
+    blurb: 'Optional, and each one at most 1 MB. A clear phone photo is enough.',
+    fields: DOCUMENT_FIELDS,
+  },
+  {
     id: 'review',
     title: 'Review',
     blurb: 'Check everything once more. Nothing is sent until you submit.',
@@ -174,8 +212,14 @@ export function stepOf(field: string): number {
   return index === -1 ? STEPS.length - 1 : index
 }
 
-/** Every field, in the order the form asks them — what a draft keeps. */
-export const DRAFT_FIELDS: readonly ApplicationField[] = STEPS.flatMap((step) => step.fields)
+/**
+ * Every typed field, in the order the form asks them — what a draft keeps.
+ * Never a document: a `File` cannot be written to storage, and a photo of a
+ * birth certificate is not something to leave on a café's machine anyway.
+ */
+export const DRAFT_FIELDS: readonly ApplicationField[] = STEPS.flatMap((step) => step.fields).filter(
+  (field) => !isDocumentField(field),
+)
 
 export const EMPTY_APPLICATION: Partial<ApplicationValues> = {
   department_id: '',

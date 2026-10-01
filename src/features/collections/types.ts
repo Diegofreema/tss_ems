@@ -401,6 +401,11 @@ export type FieldSpec = {
    */
   file?: string
   /**
+   * With `file`: the largest upload taken, in bytes. Refused as it lands and
+   * again by the validator — see `DOCUMENT_MAX_BYTES` for the documents'.
+   */
+  maxBytes?: number
+  /**
    * A starting file the reader can download, for an upload whose shape the
    * endpoint will not describe. Built when the button is pressed, from the
    * form's own values, so it can be filled in with what has been chosen so far.

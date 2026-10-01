@@ -14,6 +14,8 @@ import { byClassArmAndStanding } from './narrow'
 import { pendingStanding, withPendingState } from './pending-state'
 import { optionLabels } from '@/features/collections/option-feeds'
 import { studentsService } from '@/api/students/service'
+import { carriesFile } from '@/api/client'
+import { DOCUMENT_MAX_BYTES } from '@/lib/file-size'
 import type {
   CollectionDef,
   FieldSpec,
@@ -247,6 +249,48 @@ const CONTACT: FormSectionSpec = {
   ],
 }
 
+/** Only a new record asks for its documents; the edit form is the record's text. */
+const creating = (record?: Row) => !record
+
+/**
+ * The documents taken at enrolment, each optional and each sent under the
+ * school's own name for it — `passport`, `birth_certificate`,
+ * `other_certificates`.
+ *
+ * A file cannot wait on the device — the queue stores a body as data, and a
+ * `File` is not data it can hold — so an enrolment carrying any of these goes
+ * to the school now or is not saved, and the form stays open to say so. Left
+ * empty, the enrolment is the one it always was and saves offline as before.
+ */
+const DOCUMENTS: FormSectionSpec = {
+  title: 'Documents',
+  fields: [
+    {
+      key: 'passport',
+      label: 'Passport photograph',
+      file: 'image/*',
+      maxBytes: DOCUMENT_MAX_BYTES,
+      when: creating,
+      hint: 'Optional, up to 1 MB each. Attaching any document means this enrolment needs a connection to save.',
+    },
+    {
+      key: 'birth_certificate',
+      label: 'Birth certificate',
+      file: 'image/*,.pdf',
+      maxBytes: DOCUMENT_MAX_BYTES,
+      when: creating,
+    },
+    {
+      key: 'other_certificates',
+      label: 'Other certificates',
+      file: 'image/*,.pdf',
+      maxBytes: DOCUMENT_MAX_BYTES,
+      when: creating,
+      hint: 'A medical record, a health certificate — anything else the school keeps on file.',
+    },
+  ],
+}
+
 const CLASS_FIELD: FieldSpec = {
   key: 'department_id',
   label: 'Class',
@@ -425,10 +469,11 @@ export const students: CollectionDef = {
     // it is read off the device, which is what lets an enrolment be written
     // with no connection at all.
     const session = await currentSessionId()
+    const body = studentBody(values, session)
     return enqueue({
       handler: WRITE.enrolStudent,
       payload: {
-        ...studentBody(values, session),
+        ...body,
         status: ADMITTED,
         studentstatus: ACTIVE,
       },
@@ -436,6 +481,10 @@ export const students: CollectionDef = {
       targetKey: newLocalKey(),
       toast: { success: 'Student enrolled' },
       label: `Enrolment`,
+      // See `DOCUMENTS`: a file goes now or not at all.
+      wireOnly: carriesFile(body)
+        ? 'The documents need a connection to the school. Try again once you are back online, or remove them to save on this device.'
+        : undefined,
     })
   },
   form: [
@@ -458,6 +507,7 @@ export const students: CollectionDef = {
     },
     ORIGIN,
     CONTACT,
+    DOCUMENTS,
   ],
 }
 

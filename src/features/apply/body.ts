@@ -17,6 +17,11 @@ import type { ApplicationValues } from './schema.ts'
  * box is `null`, which the backend's nullable `lga_id` takes, rather than
  * `""`, which is not an id of anything.
  */
+/** A document the family attached, under its field name — or no key at all. */
+function attached<K extends string>(key: K, value: unknown): Partial<Record<K, File>> {
+  return value instanceof File ? ({ [key]: value } as Record<K, File>) : {}
+}
+
 export function applicationBody(values: ApplicationValues): ApplicationBody {
   return {
     fname: values.fname.trim(),
@@ -40,6 +45,11 @@ export function applicationBody(values: ApplicationValues): ApplicationBody {
     fathersjob: values.fathersjob.trim(),
     mothersjob: values.mothersjob.trim(),
     pemailaddress: values.pemailaddress.trim(),
+    // Left off entirely when not attached, so an application without them is
+    // the JSON one it always was. Any one of them sends it as multipart.
+    ...attached('passport', values.passport),
+    ...attached('birth_certificate', values.birth_certificate),
+    ...attached('other_certificates', values.other_certificates),
   }
 }
 

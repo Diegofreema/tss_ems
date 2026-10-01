@@ -2,6 +2,7 @@ import { FileUp, Paperclip, X } from 'lucide-react'
 import { useState } from 'react'
 import { useDropzone, type Accept, type FileError } from 'react-dropzone'
 import { Button } from '@/components/ui/button'
+import { readableSize, tooLargeMessage } from '@/lib/file-size'
 import { cn } from '@/lib/utils'
 
 /**
@@ -26,6 +27,7 @@ export function DropZone({
   accept,
   invalid,
   disabled,
+  maxSize,
 }: {
   id: string
   /** What is chosen, so the zone can name it. */
@@ -35,6 +37,8 @@ export function DropZone({
   accept?: string
   invalid?: boolean
   disabled?: boolean
+  /** The largest file taken, in bytes. A bigger one is turned down as it lands. */
+  maxSize?: number
 }) {
   /*
    * Held here rather than read off the hook's own `fileRejections`, which keep
@@ -42,7 +46,7 @@ export function DropZone({
    * the wrong file, then took the right one off again, was left reading a
    * complaint about a file that is no longer anywhere on the form.
    */
-  const [refused, setRefused] = useState<FileError | undefined>()
+  const [refused, setRefused] = useState<{ error: FileError; bytes: number } | undefined>()
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     accept: acceptMap(accept),
@@ -51,9 +55,11 @@ export function DropZone({
     // on the floor.
     multiple: false,
     maxFiles: 1,
+    maxSize,
     disabled,
     onDrop: (accepted, rejected) => {
-      setRefused(rejected[0]?.errors[0])
+      const first = rejected[0]
+      setRefused(first ? { error: first.errors[0], bytes: first.file.size } : undefined)
       // Only on an accepted file: a refused drop leaves whatever was already
       // chosen alone, rather than emptying the field as a punishment for it.
       if (accepted[0]) onFile(accepted[0])
@@ -112,11 +118,14 @@ export function DropZone({
           )}
         </div>
 
-        {accept && !isDragActive && (
+        {(accept || maxSize) && !isDragActive && (
           <div className="text-2xs uppercase tracking-label text-muted-foreground">
             {/* Separated rather than joined with a word: this line is set in
-                caps, and "OR" in the middle of it shouts. */}
-            {kinds(accept).join(' \u00b7 ')}
+                caps, and "OR" in the middle of it shouts. The limit sits on
+                the same line, so it is read before a file is chosen. */}
+            {[...kinds(accept), ...(maxSize ? [`Up to ${readableSize(maxSize)}`] : [])].join(
+              ' \u00b7 ',
+            )}
           </div>
         )}
       </div>
@@ -128,7 +137,7 @@ export function DropZone({
           <Paperclip className="size-3.75 flex-none text-brand-700" strokeWidth={2} />
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">{file.name}</div>
-            <div className="text-2xs text-muted-foreground">{size(file.size)}</div>
+            <div className="text-2xs text-muted-foreground">{readableSize(file.size)}</div>
           </div>
           <Button
             type="button"
@@ -144,11 +153,13 @@ export function DropZone({
 
       {refused && (
         <p className="mt-2 text-xs text-danger-ink">
-          {refused.code === 'file-invalid-type'
+          {refused.error.code === 'file-invalid-type'
             ? `That file is not one this takes — ${readable(accept)}.`
-            : refused.code === 'too-many-files'
-              ? 'One file at a time.'
-              : refused.message}
+            : refused.error.code === 'file-too-large' && maxSize
+              ? tooLargeMessage(refused.bytes, maxSize)
+              : refused.error.code === 'too-many-files'
+                ? 'One file at a time.'
+                : refused.error.message}
         </p>
       )}
     </div>
@@ -201,7 +212,14 @@ function kinds(accept?: string): string[] {
     .split(',')
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((part) => (part.startsWith('.') ? part.slice(1).toUpperCase() : part))
+    .map((part) => {
+      if (part.startsWith('.')) return part.slice(1).toUpperCase()
+      // A family of types, as a person names it: `image/*` is "an image",
+      // which the line used to print as the MIME type itself.
+      const family = /^(image|audio|video)\/\*$/.exec(part)?.[1]
+      if (family) return family[0].toUpperCase() + family.slice(1)
+      return part.includes('/') ? part.split('/')[1].toUpperCase() : part
+    })
 }
 
 /** The same, as a sentence — for the refusal, which is not set in caps. */
@@ -210,11 +228,4 @@ function readable(accept?: string): string {
   if (parts.length === 0) return ''
   if (parts.length === 1) return parts[0]
   return `${parts.slice(0, -1).join(', ')} or ${parts.at(-1)}`
-}
-
-/** A file size a person reads, rather than a number of bytes. */
-function size(bytes: number): string {
-  if (bytes < 1024) return `${bytes} bytes`
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }

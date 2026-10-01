@@ -153,8 +153,9 @@ export function ApplyPage() {
             Apply for admission
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Three short steps about your child, your home and the parents, then a last look
-            before you send it. Everything you type is kept on this tab until you do.
+            A few short steps about your child, your home and the parents, any documents you
+            have to hand, then a last look before you send it. Everything you type is kept on
+            this tab until you do — the documents are not, so attach them last.
           </p>
         </div>
 

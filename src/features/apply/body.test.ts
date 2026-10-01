@@ -90,3 +90,11 @@ test('a refusal is read as the sentence for each field, the rule dropped', () =>
   )
   assert.deepEqual(refusedFields(undefined), {})
 })
+
+test('an attached document rides along under its own name, and an absent one is no key at all', () => {
+  const passport = new File(['x'], 'chidi.jpg', { type: 'image/jpeg' })
+  const body = applicationBody({ ...SAMPLE, passport })
+  assert.equal(body.passport, passport)
+  assert.equal('birth_certificate' in body, false)
+  assert.equal('passport' in applicationBody(SAMPLE), false)
+})

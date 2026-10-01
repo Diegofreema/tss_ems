@@ -13,6 +13,11 @@ function text(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
+/** A document the office attached, under its field name — or no key at all. */
+function attached<K extends string>(key: K, value: unknown): Partial<Record<K, File>> {
+  return value instanceof File ? ({ [key]: value } as Record<K, File>) : {}
+}
+
 function asId(value: unknown): number | undefined {
   const parsed = Number(value)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
@@ -65,6 +70,9 @@ export function teacherBody(values: FormValues): CreateStaffBody {
      */
     country_id: asId(values.state) ? schoolCountryId(STATES_KNOWN_FOR) : undefined,
     state_id: asId(values.state),
+    // The passport photograph, asked for on a new teacher only, and left off
+    // entirely when not attached.
+    ...attached('passports', values.passports),
   }
 }
 

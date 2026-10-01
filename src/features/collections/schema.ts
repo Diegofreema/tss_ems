@@ -1,5 +1,6 @@
 import { z, type ZodType } from 'zod'
 import type { FieldSpec, FormSectionSpec } from './types.ts'
+import { tooLargeMessage } from '../../lib/file-size.ts'
 
 /** The design accepts digits, separators and spaces in a numeric field. */
 const NUMERIC = /^[0-9,.\s]+$/
@@ -14,7 +15,15 @@ function schemaForField(field: FieldSpec): ZodType {
     // The browser will not let a file input be filled from code, so an edit
     // form opens with nothing chosen even where the record has a cover.
     // Requiring one here would refuse every edit that did not re-pick it.
-    return z.instanceof(File).optional()
+    const max = field.maxBytes
+    if (max === undefined) return z.instanceof(File).optional()
+    // Named in the file's own size, so the reader knows how far over it is.
+    return z
+      .instanceof(File)
+      .superRefine((file, context) => {
+        if (file.size > max) context.addIssue({ code: 'custom', message: tooLargeMessage(file.size, max) })
+      })
+      .optional()
   }
 
   if (field.date) {

@@ -1,4 +1,4 @@
-import { paginated, request, requestBlob } from '../client'
+import { bodyOrForm, paginated, request, requestBlob } from '../client'
 import type { Id } from '../types'
 import type {
   AssignSubjectsBody,
@@ -19,7 +19,7 @@ export const teachersService = {
 
   /** Creates the Users login and the Teachers record in one call. */
   create: (body: CreateStaffBody) =>
-    request<{ teacher: Teacher }>('teachers', { method: 'POST', body }),
+    request<{ teacher: Teacher }>('teachers', { method: 'POST', ...bodyOrForm(body) }),
 
   update: (id: Id, body: UpdateStaffBody) =>
     request<{ teacher: Teacher }>(`teachers/${id}`, { method: 'POST', body }),

@@ -32,6 +32,7 @@ export function FileField<TValues extends FieldValues>({
   required,
   span,
   template,
+  maxSize,
 }: {
   name: Path<TValues>
   label: string
@@ -42,6 +43,8 @@ export function FileField<TValues extends FieldValues>({
   span?: FieldSpan
   /** A file to start from, where the endpoint expects a particular shape. */
   template?: FileTemplate
+  /** The largest file taken, in bytes. */
+  maxSize?: number
 }) {
   const { control, getValues } = useFormContext<TValues>()
   const { field, fieldState } = useController({ control, name })
@@ -60,6 +63,7 @@ export function FileField<TValues extends FieldValues>({
         id={name}
         accept={accept}
         invalid={Boolean(error)}
+        maxSize={maxSize}
         // `field.value` is typed by the form's shape, which for a file field
         // is whatever the collection declared; the check is what makes it a
         // `File` here rather than the assertion doing it.

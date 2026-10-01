@@ -52,6 +52,14 @@ export function announceRefused(label: string, error: unknown): void {
 }
 
 /**
+ * A write that could only go over the wire, and could not go now. Nothing was
+ * kept: the form is still open, and this says what to do about it.
+ */
+export function announceUnsendable(label: string, why: string): void {
+  toast.error(`${label} was not saved. ${why}`)
+}
+
+/**
  * What the school said it did, where that is not simply "saved".
  *
  * Neither a success nor a failure: the write landed, and the answer carried

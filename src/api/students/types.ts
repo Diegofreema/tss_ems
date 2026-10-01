@@ -144,6 +144,15 @@ export type StudentBody = {
    */
   country_id?: number
   state_id?: number
+  /**
+   * The documents taken at enrolment, each optional. Any one of them sends
+   * the create as multipart, under these names — the school's, not the
+   * `passporturl`/`birthcerturl`/`othercerts` it stores them as.
+   */
+  passport?: File
+  birth_certificate?: File
+  /** Anything else on file: a medical record, a health certificate. */
+  other_certificates?: File
 }
 
 /** The API accepts exactly these two words. */
@@ -204,4 +213,11 @@ export type ApplicationBody = {
   mothersjob: string
   /** The family's email, which the office replies to. */
   pemailaddress: string
+  /**
+   * The same three documents the office attaches at enrolment, under the
+   * same names. Any one of them sends the application as multipart.
+   */
+  passport?: File
+  birth_certificate?: File
+  other_certificates?: File
 }

@@ -9,6 +9,11 @@ function text(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
+/** A document the office attached, under its field name — or no key at all. */
+function attached<K extends string>(key: K, value: unknown): Partial<Record<K, File>> {
+  return value instanceof File ? ({ [key]: value } as Record<K, File>) : {}
+}
+
 function asId(value: unknown): number | undefined {
   const parsed = Number(value)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
@@ -53,5 +58,11 @@ export function studentBody(values: FormValues, sessionId?: number): StudentBody
     country_id: schoolCountryId(values.country),
     state_id: asId(values.state),
     session_id: sessionId,
+    // Only ever on an enrolment — the edit form does not ask for them. Left
+    // off entirely when not attached, so a body without them is the JSON one
+    // it always was.
+    ...attached('passport', values.passport),
+    ...attached('birth_certificate', values.birth_certificate),
+    ...attached('other_certificates', values.other_certificates),
   }
 }

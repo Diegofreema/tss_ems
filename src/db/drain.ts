@@ -15,6 +15,7 @@ import {
   announceNote,
   announceRefused,
   announceSaved,
+  announceUnsendable,
 } from './toast'
 
 export type EnqueueSpec = {
@@ -48,6 +49,13 @@ export type EnqueueSpec = {
    * simply waits for the set, which is exactly what it does today.
    */
   onSent?: (answer: unknown) => void
+  /**
+   * The write carries something the queue cannot hold — a `File` has no form
+   * the durable outbox can store — so it is sent now or not at all. The
+   * sentence is what the writer is told when it cannot go now; the outcome is
+   * `refused`, which keeps the form open with everything still in it.
+   */
+  wireOnly?: string
 }
 
 /**
@@ -129,12 +137,21 @@ export async function enqueue(spec: EnqueueSpec): Promise<WriteOutcome> {
       }
 
       if (verdict === 'auth') pausedForAuth = true
+      if (spec.wireOnly) {
+        announceUnsendable(spec.label, spec.wireOnly)
+        return 'refused'
+      }
       hold(spec, { tried: true, why: reasonOf(error) })
       return 'held'
     }
 
     landedOnTheWire(spec, handler, answer)
     return 'sent'
+  }
+
+  if (spec.wireOnly) {
+    announceUnsendable(spec.label, spec.wireOnly)
+    return 'refused'
   }
 
   hold(spec, { tried: false })

@@ -14,6 +14,8 @@ import { byId } from '@/features/collections/order'
 import { byStaffKind } from './narrow'
 import { adminsService } from '@/api/admins/service'
 import { teachersService } from '@/api/teachers/service'
+import { carriesFile } from '@/api/client'
+import { DOCUMENT_MAX_BYTES } from '@/lib/file-size'
 import type {
   CollectionDef,
   FieldSpec,
@@ -224,13 +226,18 @@ function saveStaff(kind?: 'teacher' | 'admin') {
       })
     }
 
+    const payload = office ? adminBody(values) : teacherBody(values)
     return enqueue({
       handler: office ? WRITE.createAdmin : WRITE.createTeacher,
-      payload: office ? adminBody(values) : teacherBody(values),
+      payload,
       collectionId: office ? SET.refAdmins : SET.refTeachers,
       targetKey: newLocalKey(),
       toast: { success: office ? 'Administrator created' : 'Teacher created' },
       label: `Staff record “${named}”`,
+      // See `PHOTO`: a file goes now or not at all.
+      wireOnly: carriesFile(payload)
+        ? 'The passport photograph needs a connection to the school. Try again once you are back online, or remove it to save on this device.'
+        : undefined,
     })
   }
 }
@@ -409,6 +416,31 @@ const TEACHING: FormSectionSpec = {
   ],
 }
 
+/**
+ * The teacher's passport photograph, sent as `passports` — the school's own
+ * name for it, the same field `POST /teachers/me` takes. On a new teaching
+ * record only: the office record takes no file, and the edit form is the
+ * record's text.
+ *
+ * Optional, and it changes how the save travels: the queue cannot hold a
+ * file, so a record carrying one goes to the school now or is not saved.
+ */
+const PHOTO: FormSectionSpec = {
+  title: 'Passport photograph',
+  when: isTeaching,
+  fields: [
+    {
+      key: 'passports',
+      label: 'Passport photograph',
+      file: 'image/*',
+      maxBytes: DOCUMENT_MAX_BYTES,
+      wide: true,
+      when: (record) => !record,
+      hint: 'Optional, up to 1 MB. Attaching it means this record needs a connection to save.',
+    },
+  ],
+}
+
 const STAFF_COLUMNS: CollectionDef['columns'] = [
   { key: 'name', label: 'Name', cardRole: 'title' },
   { key: 'role', label: 'Role', cardRole: 'subtitle' },
@@ -540,6 +572,7 @@ export const staff: CollectionDef = {
     ACCOUNT,
     PLACE,
     TEACHING,
+    PHOTO,
   ],
 }
 
@@ -732,7 +765,7 @@ export const staffTeachers = staffSlice(
     collection: staffBinding('teacher'),
     source: ({ page, q }) => listTeachers(page, q),
     queue: saveStaff('teacher'),
-    form: [IDENTITY, TEACHER_CLASS, ACCOUNT, PLACE, TEACHING],
+    form: [IDENTITY, TEACHER_CLASS, ACCOUNT, PLACE, TEACHING, PHOTO],
   },
 )
 

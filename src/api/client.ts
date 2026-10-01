@@ -174,3 +174,29 @@ export function toFormData(body: Record<string, string | number | File | undefin
   }
   return form
 }
+
+/**
+ * JSON, unless the body carries a file — then multipart, since a `File` has no
+ * JSON form. For the creates whose documents are optional: a student enrolled
+ * without a passport photograph is the same request it always was.
+ *
+ * A null is sent as an empty string rather than dropped, because on these
+ * bodies null means "clear it" (a middle name the office deleted) and an
+ * absent key means "leave it". The server reads an empty field as null.
+ */
+export function bodyOrForm(
+  body: Record<string, unknown>,
+): Pick<RequestOptions, 'body' | 'form'> {
+  if (!carriesFile(body)) return { body }
+  const form = new FormData()
+  for (const [key, value] of Object.entries(body)) {
+    if (value === undefined) continue
+    form.append(key, value instanceof File ? value : value === null ? '' : String(value))
+  }
+  return { form }
+}
+
+/** Whether a body carries a file, and so can only go to the school over the wire. */
+export function carriesFile(body: Record<string, unknown>): boolean {
+  return Object.values(body).some((value) => value instanceof File)
+}

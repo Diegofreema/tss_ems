@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { applicationSchema, DRAFT_FIELDS, STEPS, stepOf, type ApplicationValues } from './schema.ts'
+import {
+  applicationSchema,
+  DOCUMENT_FIELDS,
+  DRAFT_FIELDS,
+  STEPS,
+  stepOf,
+  type ApplicationValues,
+} from './schema.ts'
 
 const fields = Object.keys(applicationSchema.shape)
 
@@ -40,8 +47,17 @@ test('every field is on exactly one step', () => {
   assert.equal(new Set(placed).size, placed.length)
 })
 
-test('a draft keeps every field', () => {
-  assert.deepEqual([...DRAFT_FIELDS].sort(), [...fields].sort())
+test('a draft keeps every typed field, and never a document', () => {
+  const typed = fields.filter((field) => !(DOCUMENT_FIELDS as readonly string[]).includes(field))
+  assert.deepEqual([...DRAFT_FIELDS].sort(), [...typed].sort())
+})
+
+test('a document over 1 MB is refused in its own size, and none at all is fine', () => {
+  const big = new File([new Uint8Array(1024 * 1024 + 1)], 'scan.jpg', { type: 'image/jpeg' })
+  const small = new File(['x'], 'photo.jpg', { type: 'image/jpeg' })
+  assert.deepEqual(refused({ passport: big }), ['passport'])
+  assert.deepEqual(refused({ passport: small, birth_certificate: small }), [])
+  assert.equal(stepOf('birth_certificate'), 3)
 })
 
 test('a refused field sends the reader back to its own step', () => {

@@ -4,8 +4,15 @@ import { useApplyingClasses } from '@/api/departments/hooks'
 import { useCountries, useLgas, useStates } from '@/api/places/hooks'
 import { Button } from '@/components/ui/button'
 import type { Option } from '@/features/collections/options'
+import { readableSize } from '@/lib/file-size'
 import { formatDate } from '@/lib/format'
-import { LABELS, STEPS, type ApplicationField, type ApplicationValues } from '../schema'
+import {
+  isDocumentField,
+  LABELS,
+  STEPS,
+  type ApplicationField,
+  type ApplicationValues,
+} from '../schema'
 
 /**
  * The whole application read back, a step to a card, each with a way into the
@@ -26,6 +33,7 @@ export function Review({ onEdit }: { onEdit: (step: number) => void }) {
   const answer = (field: ApplicationField) => {
     const value = values[field]
     if (value instanceof Date) return formatDate(value)
+    if (value instanceof File) return `${value.name} (${readableSize(value.size)})`
     const list = named[field]
     if (list && value) return list.find((option) => option.value === value)?.label ?? value
     return typeof value === 'string' && value.trim() ? value.trim() : undefined
@@ -51,7 +59,11 @@ export function Review({ onEdit }: { onEdit: (step: number) => void }) {
                     {LABELS[field]}
                   </dt>
                   <dd className="mt-0.5 text-sm break-words">
-                    {given ?? <span className="text-muted-foreground">Not given</span>}
+                    {given ?? (
+                      <span className="text-muted-foreground">
+                        {isDocumentField(field) ? 'Not attached' : 'Not given'}
+                      </span>
+                    )}
                   </dd>
                 </div>
               )

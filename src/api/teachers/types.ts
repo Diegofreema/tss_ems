@@ -111,6 +111,12 @@ export type CreateStaffBody = {
    * `POST /teachers` takes it here, and `POST /teachers/{id}` reassigns with it.
    */
   class_arm_id?: number | string
+  /**
+   * The passport photograph, taken at creation. Plural because that is the
+   * school's name for it — `POST /teachers/me` takes the same field. Present,
+   * it sends the create as multipart.
+   */
+  passports?: File
 }
 
 /** The same fields on an edit, all optional — `class_arm_id` reassigns the arm. */

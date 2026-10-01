@@ -213,3 +213,10 @@ test('a teacher birthday goes onto the login as ISO, and drops when empty', () =
     assert.equal(teacherBody({ ...TEACHING_FORM, dob: empty }).dob, undefined)
   }
 })
+
+test('a teacher’s passport photograph goes out as `passports`, and nowhere else', () => {
+  const photo = new File(['x'], 'nnaji.jpg', { type: 'image/jpeg' })
+  assert.equal(teacherBody({ ...values, passports: photo }).passports, photo)
+  assert.equal('passports' in teacherBody(values), false)
+  assert.equal('passports' in adminBody({ ...values, passports: photo }), false)
+})

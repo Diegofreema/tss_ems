@@ -1,4 +1,4 @@
-import { paginated, request } from '../client'
+import { bodyOrForm, paginated, request } from '../client'
 import type { Id } from '../types'
 import type { Invoice } from '../invoices/types'
 import type {
@@ -34,12 +34,13 @@ export const studentsService = {
    * `applicants` above reads back for the office.
    */
   apply: (body: ApplicationBody) =>
-    request<unknown>('students/apply', { method: 'POST', body }),
+    request<unknown>('students/apply', { method: 'POST', ...bodyOrForm(body) }),
 
   get: (id: Id) => request<{ student: Student }>(`students/${id}`).then((data) => data.student),
 
+  /** Multipart where the office attached documents, JSON otherwise. */
   create: (body: StudentBody) =>
-    request<{ student: Student }>('students', { method: 'POST', body }),
+    request<{ student: Student }>('students', { method: 'POST', ...bodyOrForm(body) }),
 
   update: (id: Id, body: StudentBody) =>
     request<{ student: Student }>(`students/${id}`, { method: 'POST', body }),

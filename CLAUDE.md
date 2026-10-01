@@ -281,6 +281,14 @@ every write made after it would wedge the app on one refusal.
   reason: a form carrying a file has no body the queue could hold, and a create that reads the
   school before writing — a student's enrolment asks which session is current — has nothing to read
   when there is no school to ask.
+- **A queued form whose file is optional sends `wireOnly`**, not `save`. Enrolling a student
+  (passport, birth certificate, other certificates) and creating a teacher (`passports`) still
+  queue as JSON when nothing is attached; attach a file and `bodyOrForm` sends it multipart, and
+  `enqueue` either sends it now or returns `refused` with the sentence — it never writes a `File`
+  into the outbox. The apply page sends the same three documents under the same names, and never
+  keeps one in its draft. Every document is capped at `DOCUMENT_MAX_BYTES` (1 MB), on the drop
+  zone and in the schema. Ported from ems_gold; the field names are the school's and have not yet
+  been seen accepted by this backend.
 - **Nothing may read the queue before `storeReady()` resolves.** A persisted collection hydrates
   asynchronously, and until it has, `toArray` is an empty list indistinguishable from an empty
   queue — a drain started early finds nothing and stops, and an `enqueue` numbers its op `1` on top

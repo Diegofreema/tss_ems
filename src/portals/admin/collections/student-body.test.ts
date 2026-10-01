@@ -112,3 +112,18 @@ test('a student with no school before this one is enrolled without one', () => {
   const cleared = studentBody({ ...filled, previousschool: '' })
   assert.equal('previousschool' in cleared, true)
 })
+
+test('an attached document goes out under the school’s own name for it', () => {
+  const passport = new File(['x'], 'ngozi.jpg', { type: 'image/jpeg' })
+  const medical = new File(['x'], 'medical.pdf', { type: 'application/pdf' })
+  const body = studentBody({ ...filled, passport, other_certificates: medical }, 1)
+  assert.equal(body.passport, passport)
+  assert.equal(body.other_certificates, medical)
+  assert.equal('birth_certificate' in body, false)
+})
+
+test('a document box holding anything but a file sends nothing', () => {
+  const body = studentBody({ ...filled, passport: 'ngozi.jpg', birth_certificate: '' }, 1)
+  assert.equal('passport' in body, false)
+  assert.equal('birth_certificate' in body, false)
+})

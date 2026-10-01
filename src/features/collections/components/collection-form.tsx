@@ -80,6 +80,7 @@ function renderField(field: FieldSpec, record?: Row, settled?: boolean) {
         {...shared}
         accept={field.file}
         template={field.template}
+        maxSize={field.maxBytes}
       />
     )
   if (field.date)

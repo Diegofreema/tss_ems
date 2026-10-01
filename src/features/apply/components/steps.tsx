@@ -3,8 +3,10 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { useApplyingClasses } from '@/api/departments/hooks'
 import { useCountries, useLgas, useStates } from '@/api/places/hooks'
 import { DateField } from '@/components/form/date-field'
+import { FileField } from '@/components/form/file-field'
 import { SelectField } from '@/components/form/select-field'
 import { TextField } from '@/components/form/text-field'
+import { DOCUMENT_MAX_BYTES } from '@/lib/file-size'
 import { RELIGIONS } from '@/portals/admin/collections/student-row'
 import { LABELS, type ApplicationField, type ApplicationValues } from '../schema'
 import { FetchedSelect } from './fetched-select'
@@ -185,6 +187,37 @@ function Parent({
   )
 }
 
+/**
+ * The three documents, each optional. A photo of a paper certificate taken on
+ * a phone is what most families have, so images go everywhere a PDF does.
+ */
+function Documents() {
+  return (
+    <div className="grid gap-5">
+      <FileField<ApplicationValues>
+        name="passport"
+        label={LABELS.passport}
+        accept="image/*"
+        maxSize={DOCUMENT_MAX_BYTES}
+        hint="A recent photo of your child's face, against a plain background."
+      />
+      <FileField<ApplicationValues>
+        name="birth_certificate"
+        label={LABELS.birth_certificate}
+        accept="image/*,.pdf"
+        maxSize={DOCUMENT_MAX_BYTES}
+      />
+      <FileField<ApplicationValues>
+        name="other_certificates"
+        label={LABELS.other_certificates}
+        accept="image/*,.pdf"
+        maxSize={DOCUMENT_MAX_BYTES}
+        hint="A medical record, a health certificate — anything else the school should have."
+      />
+    </div>
+  )
+}
+
 /** Each step's body, in the order `STEPS` names them. */
 export function StepBody({ index, onEdit }: { index: number; onEdit: (step: number) => void }) {
   switch (index) {
@@ -194,6 +227,8 @@ export function StepBody({ index, onEdit }: { index: number; onEdit: (step: numb
       return <Home />
     case 2:
       return <Parents />
+    case 3:
+      return <Documents />
     default:
       return <Review onEdit={onEdit} />
   }
