@@ -647,11 +647,20 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   a fifth.
 - **The design's own greys are `--ui-*`, and the brand ramp is anchored on its blue.** They arrived
   with the sign-in screens and now carry the shell and the office's pages too, which is why
-  `--ems-brand` is `#356ead`: two near-identical blues side by side is the one thing a half-applied
-  design always looks like. `--ui-field` fills an input, `--ui-line` fills a table's header band,
+  `--ui-blue` and `--ems-brand` are one value in each theme: two near-identical blues side by side
+  is the one thing a half-applied design always looks like. `--ui-field` fills an input, `--ui-line` fills a table's header band,
   `--ui-paper` is the sign-in page's own ground and `--ui-poster` the blue half beside it, and every
   one of them has a dark half now. Tile accents (`--tile-*`) are decoration and nothing else: they
   let somebody find a figure by its colour, and no other component may reach for them.
+- **Daylight wears the school's own palette; the dark theme does not (yet).** Three blues — navy
+  `#07285e`, mid `#0a4aa2`, light `#1769d2` — are steps 800, 600 and 500 of the brand ramp, with mid
+  as `--ems-brand`; the red `#ea3136`/`#dc414c` and the gold `#e8c37b` are `--ems-accent-red*` and
+  `--ems-gold`. Two limits were measured and are the reason for where each one goes. **White on
+  either red is 4.2:1**, under the 4.5 words need, so danger — a fill that carries words — is the same
+  red a step deeper (`#d42a31`, 5:1), and the brand reds themselves draw tiles, borders and tints.
+  **Gold is 1.7:1 on white**, so it is never a word on the page: it is a highlight on navy (8.5:1) or
+  a fill with navy on it. Every light value the dark block did not already declare is pinned there at
+  its old one, so changing the daylight palette never moves the dark theme — keep it that way.
 - **The sign-in screens follow the device's theme like every other page.** They were drawn in one
   palette and pinned to it — `.auth-daylight` re-declared the light tokens on the container — so a
   person who had set the portal to dark signed out and was handed a white page. The theme is a
@@ -726,21 +735,24 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   `data-rail` on the aside is what the whole collapsed styling hangs off, one attribute rather than
   a `shut` prop threaded through four components: `.rail-label` fades and loses its width so the
   words go rather than vanish, `.rail-wordy` removes what has no icon to shrink to (the term card,
-  the sub-items, the badges, the Tools heading), and the wordmark cross-fades to the globe.
-  **That globe is cut from the wordmark itself** — `public/netpro-mark.png` is the last glyph of
-  `netpro-logo.webp`, trimmed to its own edges and centred on a square at its native 114px, never
-  scaled up. So the folded rail and the full one cannot drift apart, and it is the same mark the
-  browser tab carries. The old `favicon.svg` was a purple lightning bolt from another brand
-  entirely, and so were the PWA icons and `apple-touch-icon.png` — all five are the globe now.
-  **114px is the only original there is**, so the four large icons are upscaled from it, and two
-  things about that are easy to get wrong. Pillow resamples colour and alpha apart, which averages
-  the colour under transparent pixels into every edge and fringes the mark, so the resize goes
-  through the premultiplied `RGBa` mode. And the canvas is **RGB, not RGBA**: pasting through a
-  mask onto an RGBA canvas writes the mask into the destination alpha too, so the mark's
-  antialiased edge comes out semi-transparent and a dark launcher shows through it — which is how
-  the first cut of these shipped before the opacity was asserted. The coverages (66% for the plain
-  icons, 46% for the maskable one, whose middle 80% is all a launcher guarantees) are the ones the
-  purple icons already used, so the mark sits at the weight the app had. The swing is `calc(260ms * var(--ems-motion))`, so a reader who has
+  the sub-items, the badges, the Tools heading), and the school's logo cross-fades to its crest.
+  **Every logo file is cut from the school's one logo by `scripts/brand-assets.py`** —
+  `brand/school-logo-source.png` is the lock-up (crest and "Treasure Scientia School"), and the
+  script writes `school-logo.png` (the lock-up trimmed: the open rail, sign-in, apply),
+  `school-crest.png` (the crest alone: the tab's favicon, the folded rail) and the four installed-app
+  icons. Never edit those by hand; replace the source and rerun. The crest is taken as the largest
+  shape that touches nothing else rather than as a rectangle, because the "T" of TREASURE starts
+  inside the crest's bounding box and a crop carried a sliver of it into every icon. **The source on
+  file is 302x123**, so the crest is 136px and the 512px icons are upscaled from it; a larger
+  original is the fix, and the script says so every time it runs. Two things about the resampling
+  are easy to get wrong. Pillow resamples colour and alpha apart, which averages the colour under
+  transparent pixels into every edge and fringes the mark, so the resize goes through the
+  premultiplied `RGBa` mode. And the icon canvas is **RGB, not RGBA**: pasting through a mask onto
+  an RGBA canvas writes the mask into the destination alpha too, so the mark's antialiased edge
+  comes out semi-transparent and a dark launcher shows through it — which is how the first cut of
+  the previous icons shipped before the opacity was asserted. The crest fills 80% of a plain icon
+  and 60% of the maskable one, whose circle of 80% is all a launcher guarantees; at 60% the
+  ribbon's tips, its farthest points from the centre, stay inside it. The swing is `calc(260ms * var(--ems-motion))`, so a reader who has
   turned motion off gets the new width at once rather than a crawl.
   Two things this must not break, both found by breaking them: the **drawer** takes `w-0` for its
   slot, since the sheet is `fixed` and a slot holding 264px open would push the page out from under

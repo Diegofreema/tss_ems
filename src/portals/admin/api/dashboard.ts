@@ -14,6 +14,7 @@ import {
   financeFigures,
   ledgerTotals,
   peopleFigures,
+  readStats,
   schoolTiles,
 } from '../features/dashboard/dashboard'
 
@@ -99,10 +100,11 @@ async function fetchDashboard(): Promise<AdminDashboard> {
   const collected = money.find((figure) => figure.label === 'Collected')
   if (collected) collected.spark = collections.bars.map((bar) => bar.value)
 
+  const stats = readStats(counters?.stats)
   return {
     money,
-    people: peopleFigures(counters.stats),
-    school: schoolTiles(counters.stats),
+    people: peopleFigures(stats),
+    school: schoolTiles(stats),
     collections,
     activity: activityEntries(logs.items, today),
   }

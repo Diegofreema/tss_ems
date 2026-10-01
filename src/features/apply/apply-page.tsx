@@ -135,7 +135,7 @@ export function ApplyPage() {
       <header className="sticky top-0 z-30 border-b border-divider bg-[color-mix(in_srgb,var(--ems-ground)_88%,transparent)] backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-280 items-center gap-4 px-content py-3">
           <Link to="/sign-in" aria-label="Back to sign in">
-            <img src="/netpro-logo.webp" alt="netpro" className="h-7 w-auto" />
+            <img src="/school-logo.png" alt="Treasure Scientia School" className="h-10 w-auto" />
           </Link>
           <div className="ml-auto flex items-center gap-3 text-sm">
             <span className="hidden text-muted-foreground sm:inline">Already a student?</span>

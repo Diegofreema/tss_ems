@@ -1,12 +1,17 @@
 # TSS EMS — Apache / cPanel configuration
-# Place in the same folder as index.html (normally public_html).
+# Goes in the same folder as index.html: the portal's document root, beside
+# the school's own backend/ folder (on this host, /home/tsssch/portal.tss.sch.ng).
 #
 # Rule order matters and is not arbitrary. In .htaccess, [L] restarts the
 # whole ruleset with the rewritten URI rather than stopping, so the API and
 # SPA rules use [END] (Apache 2.4+, which every cPanel host runs) to mean
 # what [L] looks like it means. Getting this wrong loops or silently skips
 # later blocks.
+#
+# assets/.htaccess is the other half of this file — see the caching block.
 
+# No directory listings. Without this the portal's root listed its own folders
+# to anybody who asked (measured 2026-09-24: "Index of /" naming backend/).
 Options -Indexes
 DirectoryIndex index.html
 
@@ -14,22 +19,24 @@ DirectoryIndex index.html
   RewriteEngine On
 
   # --- 0. Force https -----------------------------------------------------
-  # FIRST, or the [END] rules below would stop us ever reaching it.
+  # FIRST, or the [END] rules below would stop us ever reaching it. The
+  # service worker and the device's own database both need a secure context,
+  # so over http the portal has no offline at all.
   # Comment out if TLS is terminated by a proxy in front of Apache.
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
   RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
   # --- 1. The API ---------------------------------------------------------
-  # The API is same-origin, served by Laravel from /backend on this same host,
-  # so there is nothing to proxy — the browser calls it directly.
+  # The API is same-origin, served by the school's CakePHP app from /backend
+  # on this same host, so there is nothing to proxy — the browser calls it
+  # directly.
   #
-  # This rule exists to keep the SPA fallback below OFF it. Laravel's own
-  # .htaccess inside /backend already wins (a child .htaccess with its own
-  # RewriteEngine On overrides a parent's rules), so this is belt and braces —
-  # but if it ever stopped winning, every API call would silently come back as
-  # the app's own index.html, which fetch() would fail to parse with no clue
-  # as to why. Cheap insurance against an expensive afternoon.
+  # This rule exists to keep the SPA fallback below OFF it. The backend's own
+  # .htaccess already wins (a child .htaccess with its own RewriteEngine On
+  # overrides a parent's rules), so this is belt and braces — but if it ever
+  # stopped winning, every API call would silently come back as the app's own
+  # index.html, which fetch() would fail to parse with no clue as to why.
   RewriteRule ^backend(/.*)?$ - [END]
 
   # --- 2. SPA fallback ----------------------------------------------------
@@ -38,7 +45,9 @@ DirectoryIndex index.html
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [END]
 
-  # Everything else is a client-side route: hand it the shell.
+  # Everything else is a client-side route: hand it the shell. (Not under
+  # assets/ — that folder switches rewriting off, so a missing chunk is a real
+  # 404 rather than index.html served as JavaScript.)
   RewriteRule ^ index.html [END]
 </IfModule>
 
@@ -53,13 +62,24 @@ DirectoryIndex index.html
   AddType text/javascript            .js .mjs
 </IfModule>
 
-# --- 4. Caching -----------------------------------------------------------
-<IfModule mod_headers.c>
-  # Hashed filenames (assets/name-HASH.js) never change content. Cache hard.
-  <FilesMatch "-[A-Za-z0-9_-]{8,}\.(js|css|woff2|png|webp|svg)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
+# --- 4. Compression -------------------------------------------------------
+# Measured 2026-09-24: the host sends nothing compressed. The app is ~6.5 MB
+# of JavaScript as built and roughly a quarter of that gzipped, which on a 3G
+# link is the difference between a first visit and a timeout. Applies to the
+# API's JSON under /backend as well, which inherits this block.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/javascript
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/manifest+json image/svg+xml
+  AddOutputFilterByType DEFLATE application/wasm
+</IfModule>
 
+# --- 5. Caching -----------------------------------------------------------
+# The hashed bundles are cached for a year by assets/.htaccess, which is the
+# only folder whose names Vite hashes. Matching "a hash-looking suffix" here
+# instead also caught pwa-maskable-512.png and apple-touch-icon.png, which are
+# not hashed and would have kept an old icon for a year.
+<IfModule mod_headers.c>
   # The shell and the service worker must NEVER be cached, or a browser goes
   # on serving an old build after a deploy and nothing can reach the user to
   # tell them. This is the most important block in the file.
@@ -69,6 +89,12 @@ DirectoryIndex index.html
     Header set Expires "0"
   </FilesMatch>
 
+  # The images in the root (logo, icons, the sign-in poster) keep their names
+  # across builds, so a day rather than a year.
+  <FilesMatch "\.(png|webp|svg|ico)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+
   # --- Security headers ---
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
@@ -76,16 +102,4 @@ DirectoryIndex index.html
   Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
   # HSTS: uncomment once the site is certainly https-only and will stay so.
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-</IfModule>
-
-# --- 5. Compression -------------------------------------------------------
-# 437 JavaScript files. This is the difference between a ~6.5 MB and a ~1.6 MB
-# first load, which on a 3G link is minutes.
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/plain text/css
-  AddOutputFilterByType DEFLATE text/javascript application/javascript
-  AddOutputFilterByType DEFLATE application/json application/manifest+json
-  AddOutputFilterByType DEFLATE image/svg+xml
-  # Already compressed — do not waste CPU re-doing it.
-  SetEnvIfNoCase Request_URI \.(?:woff2|png|webp|jpg|gif|zip|gz)$ no-gzip dont-vary
 </IfModule>

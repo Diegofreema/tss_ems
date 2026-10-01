@@ -40,9 +40,9 @@ export function AuthLayout() {
             enough that nothing on them moves. */}
         <div key={pathname} className="w-full max-w-107 animate-ems-in">
           <img
-            src="/netpro-logo.webp"
-            alt="netpro"
-            className="mb-(--auth-mark) h-7 w-auto sm:h-8"
+            src="/school-logo.png"
+            alt="Treasure Scientia School"
+            className="mb-(--auth-mark) h-14 w-auto sm:h-16"
           />
           <Outlet />
         </div>

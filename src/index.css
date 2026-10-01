@@ -23,20 +23,23 @@
    below (`--ui-*` in the dark block) rather than the page refusing to follow.
    ───────────────────────────────────────────────────────────────────── */
 :root {
-  --ems-ground: #fafafa;
-  --ems-surface: #f2f2f2;
-  --ems-ink: #202020;
-  --ems-brand: #356ead;
+  /* The school's palette, 2026-09-24: three blues (navy, mid, light), a red
+     accent and a gold. The grounds and the ink lean a shade toward the navy
+     so the blues sit in the page rather than on top of it. */
+  --ems-ground: #f6f8fc;
+  --ems-surface: #edf1f7;
+  --ems-ink: #0f1b31;
+  --ems-brand: #0a4aa2;
   /* Softened in the "alive" pass: hairlines carry structure, they no longer
      shout it. `strong` keeps the old weight for table-header rules. */
-  --ems-divider: color-mix(in srgb, #202020 18%, transparent);
-  --ems-divider-strong: color-mix(in srgb, #202020 32%, transparent);
+  --ems-divider: color-mix(in srgb, #0f1b31 16%, transparent);
+  --ems-divider-strong: color-mix(in srgb, #0f1b31 30%, transparent);
   /* Card surfaces sit above the ground now — white in light, a lifted grey
      in dark — which is most of what makes the soft cards read as cards. */
   --ems-raised: #ffffff;
 
-  --ems-neutral-100: #f6f6f6;
-  --ems-neutral-200: #ededed;
+  --ems-neutral-100: #f2f5fa;
+  --ems-neutral-200: #e8edf5;
   --ems-neutral-300: #d2d4da;
   --ems-neutral-400: #b5b8bf;
   --ems-neutral-500: #96999f;
@@ -46,24 +49,38 @@
   --ems-neutral-900: #2a2c2f;
 
   /* Ramp anchored on --ems-brand itself at the 600 step, so buttons and
-     headings draw from one hue instead of the two blues the old ramp mixed. */
-  --ems-brand-100: #eef4fa;
-  --ems-brand-200: #d8e6f3;
-  --ems-brand-300: #b0cbe6;
-  --ems-brand-400: #7aa8d3;
-  --ems-brand-500: #4c85c0;
-  --ems-brand-600: #356ead;
-  --ems-brand-700: #2a5989;
-  --ems-brand-800: #204568;
-  --ems-brand-900: #16304a;
+     headings draw from one hue instead of the two blues the old ramp mixed.
+     The school's three blues are steps on it: light #1769d2 is 500, mid
+     #0a4aa2 is 600 (the brand), navy #07285e is 800. All three carry white
+     text — 5.3, 8.4 and 14.3 to 1. */
+  --ems-brand-100: #edf3fc;
+  --ems-brand-200: #d5e3f7;
+  --ems-brand-300: #a7c4ee;
+  --ems-brand-400: #5c95e2;
+  --ems-brand-500: #1769d2;
+  --ems-brand-600: #0a4aa2;
+  --ems-brand-700: #083a82;
+  --ems-brand-800: #07285e;
+  --ems-brand-900: #051b41;
+
+  /* The school's accent red and its gold. Neither is a role of its own: the
+     red is what danger is drawn from, and both are the tile accents and the
+     highlights on a navy surface. Two limits come with them, measured:
+     white on either red is 4.2:1, just under the 4.5 body text needs, so a
+     fill that carries words is --ems-danger (the same red a step deeper,
+     5:1); and gold is 1.7:1 on white, so it is never a word on the page —
+     it is a highlight on navy (8.5:1), or a fill with navy on it. */
+  --ems-accent-red: #ea3136;
+  --ems-accent-red-dark: #dc414c;
+  --ems-gold: #e8c37b;
 
   /* Danger is the one colour added to the palette: destructive actions and
      error states must not wear the brand blue. Split roles — `danger` is a
      fill that carries white text, `danger-ink` is text/borders on the ground,
      because no single red passes contrast in both jobs across both themes. */
-  --ems-danger: #b23b31;
-  --ems-danger-ink: #a63429;
-  --ems-danger-subtle: color-mix(in srgb, #b23b31 9%, transparent);
+  --ems-danger: #d42a31;
+  --ems-danger-ink: #c8232a;
+  --ems-danger-subtle: color-mix(in srgb, #ea3136 9%, transparent);
 
   /* Success is the second colour added to the palette: directional deltas and
      positive statuses. Same split roles as danger. */
@@ -85,7 +102,7 @@
   /* Shadows are reserved for card surfaces and floating layers; structure
      still uses borders. Dark theme swaps these for deeper black shadows. */
   --ems-shadow-card:
-    0 1px 2px rgb(16 24 40 / 0.05), 0 2px 6px rgb(16 24 40 / 0.04);
+    0 1px 2px rgb(7 40 94 / 0.05), 0 2px 6px rgb(7 40 94 / 0.05);
 
   /* A figure card: the counted tiles over a register, and a dashboard's
      figures. It has to read as a card on the page's ground *and* on a panel's
@@ -98,11 +115,11 @@
      above whatever surface it is standing on. Both are declared in both
      themes; each theme leans on the half that works there. */
   --ems-figure: #ffffff;
-  --ems-figure-edge: rgb(16 24 40 / 0.08);
+  --ems-figure-edge: rgb(7 40 94 / 0.09);
   --ems-figure-shadow:
-    0 1px 2px rgb(16 24 40 / 0.06), 0 4px 12px rgb(16 24 40 / 0.05);
+    0 1px 2px rgb(7 40 94 / 0.06), 0 4px 12px rgb(7 40 94 / 0.06);
   --ems-shadow-float:
-    0 4px 10px rgb(16 24 40 / 0.08), 0 14px 34px rgb(16 24 40 / 0.12);
+    0 4px 10px rgb(7 40 94 / 0.08), 0 14px 34px rgb(7 40 94 / 0.13);
 
   /* The design's own flat greys, sampled from the mockups rather than guessed
      at. They began on the sign-in screens and are now the shell's too, so the
@@ -110,44 +127,46 @@
      the same blue, which is why the two halves of the app finally agree.
      `field` fills an input, `line` fills a table header and any other quiet
      band, `hint` is placeholder text. */
-  --ui-blue: #356ead;
+  --ui-blue: #0a4aa2;
   /* The same blue as a *word* rather than a fill. White on `--ui-blue` passes
      in both themes, which is why the button and the checkbox share one token;
      `--ui-blue` as text on the dark ground is 3.4:1 and does not. Split roles,
      for the same reason danger and success are split. */
-  --ui-blue-ink: #356ead;
-  --ui-ring: #4c83b9;
-  --ui-ink: #202020;
-  --ui-muted: #575757;
-  --ui-hint: #8c8c8c;
-  --ui-field: #f8f8f8;
-  --ui-line: #f6f6f6;
-  --ui-error: #eb4d48;
-  --ui-error-line: #ea3628;
+  --ui-blue-ink: #0a4aa2;
+  --ui-ring: #1769d2;
+  --ui-ink: #0f1b31;
+  --ui-muted: #4d5a70;
+  --ui-hint: #8a94a6;
+  --ui-field: #f3f6fb;
+  --ui-line: #eef2f9;
+  --ui-error: #c8232a;
+  --ui-error-line: #ea3136;
   /* The sign-in page's own two grounds: the paper the form is written on, and
      the blue half beside it. `--ems-raised` would nearly do for the first, but
      the field fill sits 2 points off it at night and the control would lose
      its edge — so the paper drops to the ground colour there and the field
      lifts off it, which is the relationship the light design has. */
   --ui-paper: #ffffff;
-  --ui-poster: #356ead;
+  /* The navy, with the light blue drawn over it as the rings (--ui-ring) and
+     the gold as its one highlight. */
+  --ui-poster: #07285e;
 
   /* Tile accents. A dashboard tile carries a coloured square so a reader can
      find the figure they came for by its colour before they have read a word
      of it — which is the one job these have. Nothing else may use them. */
-  --tile-blue: #467cf6;
+  --tile-blue: #1769d2;
   --tile-green: #65c266;
   --tile-orange: #f09045;
-  --tile-red: #ea465a;
+  --tile-red: #ea3136;
   --tile-purple: #8a2478;
   --tile-violet: #5d5bec;
-  --tile-ink: #000000;
-  --tile-rose: #ea3628;
+  --tile-ink: #07285e;
+  --tile-rose: #dc414c;
 
   /* Multiplier for every duration below — the design's `motion` prop / 6.
        Set to 0 to disable animation entirely. */
   /* The design's body grey. Dark flips it below. */
-  --ems-muted: #575757;
+  --ems-muted: #4d5a70;
 
   --ems-motion: 1;
 }
@@ -193,11 +212,28 @@
   --ems-neutral-800: #e4e5e8;
   --ems-neutral-900: #0c0d10;
 
+  /* The palette above is daylight's. Everything it changed that this block
+     did not already declare is pinned here at its old value, so the dark
+     theme is exactly what it was. */
+  --ems-brand: #356ead;
   --ems-brand-100: #10283c;
   --ems-brand-200: #143855;
+  --ems-brand-300: #b0cbe6;
+  --ems-brand-400: #7aa8d3;
+  --ems-brand-500: #4c85c0;
   --ems-brand-600: #4f9fd9;
   --ems-brand-700: #7db8e4;
   --ems-brand-800: #b9d8ef;
+  --ems-brand-900: #16304a;
+
+  --ui-blue: #356ead;
+  --ui-error: #eb4d48;
+  --ui-error-line: #ea3628;
+
+  --tile-blue: #467cf6;
+  --tile-red: #ea465a;
+  --tile-ink: #000000;
+  --tile-rose: #ea3628;
 
   --ems-danger: #c0473b;
   --ems-danger-ink: #f08a7d;
@@ -415,6 +451,10 @@
   --color-tile-violet: var(--tile-violet);
   --color-tile-ink: var(--tile-ink);
   --color-tile-rose: var(--tile-rose);
+
+  --color-accent-red: var(--ems-accent-red);
+  --color-accent-red-dark: var(--ems-accent-red-dark);
+  --color-gold: var(--ems-gold);
 
   --color-danger: var(--ems-danger);
   --color-danger-ink: var(--ems-danger-ink);

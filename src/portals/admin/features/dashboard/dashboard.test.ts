@@ -11,6 +11,7 @@ import {
   financeFigures,
   ledgerTotals,
   peopleFigures,
+  readStats,
   schoolTiles,
 } from './dashboard.ts'
 
@@ -173,6 +174,36 @@ test('the school tiles carry the rest of the counters', () => {
       ['Administrators', '10'],
     ],
   )
+})
+
+test('a counter the school leaves out is 0, never NaN', () => {
+  // Typed as numbers, not always sent as them: one missing counter counted up
+  // to "NaN" on the office's home page.
+  const partial = { students: 7, classes: null, teachers: '4', hostels: 'n/a' }
+  const stats = readStats(partial as never)
+  assert.equal(stats.students, 7)
+  assert.equal(stats.classes, 0)
+  assert.equal(stats.teachers, 4)
+  assert.equal(stats.hostels, 0)
+  assert.equal(stats.parents, 0)
+
+  const figures = peopleFigures(stats)
+  assert.ok(figures.every((figure) => Number.isFinite(figure.amount)))
+  assert.equal(figures[0].delta, 'Across 0 classes')
+  assert.deepEqual(
+    schoolTiles(stats).map((tile) => tile.value),
+    ['0', '0', '0', '0'],
+  )
+  assert.equal(readStats(undefined).students, 0)
+})
+
+test('a spending month with no figures reads as nothing spent', () => {
+  const ledger = ledgerTotals([])
+  const today = new Date(2026, 8, 24)
+  const month = { month: '2026-09', total: undefined, entries: null } as never
+  const spent = financeFigures(ledger, [month], today)[3]
+  assert.equal(spent.amount, 0)
+  assert.equal(spent.delta, 'Nothing recorded yet')
 })
 
 test('a school tile links to its register, where the school has one', () => {

@@ -29,7 +29,7 @@ export default defineConfig({
       // png in `public/`, and naming them twice puts them in the manifest twice.
       manifest: {
         name: 'TSS EMS',
-        short_name: 'NETPRO',
+        short_name: 'TSS',
         description:
           'The school portal — registers, results, fees and timetables, on your device.',
         /*
@@ -41,9 +41,9 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        // --ems-brand in index.css. The splash screen and the task-switcher
+        // The navy, --ems-brand-800 in index.css. The splash screen and the task-switcher
         // chrome of an installed app are drawn from this.
-        theme_color: '#356ead',
+        theme_color: '#07285e',
         orientation: 'portrait-primary',
         icons: [
           { src: '/pwa-192.png', sizes: '192x192', type: 'image/png' },
@@ -136,12 +136,6 @@ export default defineConfig({
       '/backend': {
         target: 'https://portal.tss.sch.ng',
         changeOrigin: true,
-        // The host's Let's Encrypt certificate expired on 3 January 2026, so
-        // Node refuses the upstream connection and the proxy answers 500 —
-        // which the browser reports as a failed request with no CORS header,
-        // i.e. as a CORS error. This is dev only and must not outlive the
-        // renewal: REMOVE THIS LINE once the certificate is valid again.
-        secure: false,
       },
     },
   },

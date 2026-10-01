@@ -64,7 +64,7 @@ export function NotificationBell({
     <>
       <Bell className="size-4" strokeWidth={1.9} />
       {unread > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 grid h-4.25 min-w-4.25 place-items-center rounded-full bg-brand px-1 font-heading text-2xs font-extrabold tabular-nums text-white">
+        <span className="absolute -top-1.5 -right-1.5 grid h-4.25 min-w-4.25 place-items-center rounded-full bg-danger px-1 dark:bg-brand font-heading text-2xs font-extrabold tabular-nums text-white">
           {unread}
         </span>
       )}

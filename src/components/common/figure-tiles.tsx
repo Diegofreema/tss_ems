@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import { CountUp } from '@/components/common/count-up'
 import { TileStrip, type TileAccent } from '@/components/page/tile-strip'
-import { formatNaira } from '@/lib/format'
+import { formatNaira, orZero } from '@/lib/format'
 
 export type DashboardFigure = {
   label: string
@@ -22,9 +22,9 @@ export type DashboardFigure = {
 
 const FORMATTERS = {
   naira: formatNaira,
-  number: (value: number) => Math.round(value).toLocaleString('en-NG'),
-  percent: (value: number) => `${Math.round(value)}%`,
-  decimal: (value: number) => value.toFixed(1),
+  number: (value: number) => Math.round(orZero(value)).toLocaleString('en-NG'),
+  percent: (value: number) => `${Math.round(orZero(value))}%`,
+  decimal: (value: number) => orZero(value).toFixed(1),
 } satisfies Record<DashboardFigure['format'], (value: number) => string>
 
 /** Dashboard tiles, each counting its figure up on mount. */

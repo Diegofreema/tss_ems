@@ -33,10 +33,13 @@ export function AuthPoster() {
           she was sized against the panel's width and anchored to its foot
           while the panel itself had lost 200px of height. As the last item in
           a column she takes the room the words leave and no more. */}
-      <div className="absolute top-[6.5%] right-[10.5%] bottom-[5.3%] left-[9.7%] flex flex-col overflow-hidden rounded-[10px] border border-white/40 bg-white/25 dark:border-white/25 dark:bg-white/14">
+      <div className="absolute top-[6.5%] right-[10.5%] bottom-[5.3%] left-[9.7%] flex flex-col overflow-hidden rounded-[10px] border border-white/30 bg-white/12 dark:border-white/25 dark:bg-white/14">
         <div className="flex-none px-[6.3%] pt-(--auth-poster-lead) text-white">
           <h1 className="max-w-[9em] font-heading text-(length:--auth-poster-title) leading-[1.2] font-extrabold tracking-[-0.02em]">
-            One School one record
+            One School{' '}
+            {/* The poster's one highlight: gold is the school's colour that
+                only reads on the navy (8.5:1), never on the page. */}
+            <span className="text-gold dark:text-inherit">one record</span>
           </h1>
           <p className="mt-3 max-w-[27rem] text-(length:--auth-poster-body) leading-[1.45]">
             Fees, result, attendance and admission in one single system, the

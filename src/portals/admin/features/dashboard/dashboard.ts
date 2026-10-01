@@ -16,7 +16,7 @@ import type { Invoice } from '../../../../api/invoices/types.ts'
 import type { ActivityLog } from '../../../../api/logs/types.ts'
 import type { SpendingMonth } from '../../../../api/spendings/types.ts'
 import type { DashboardStats } from '../../../../api/users/types.ts'
-import { formatCount } from '../../../../lib/format.ts'
+import { formatCount, orZero } from '../../../../lib/format.ts'
 import { SETTLED } from '../../../../features/collections/invoice.ts'
 import { logAuthor } from '../../collections/log-row.ts'
 import { monthKey, spentIn } from '../../collections/spending-row.ts'
@@ -111,7 +111,9 @@ export function ledgerTotals(invoices: Invoice[], total = invoices.length): Ledg
  */
 export function financeFigures(ledger: Ledger, months: SpendingMonth[], today: Date) {
   const rate = ledger.billed ? Math.round((ledger.collected / ledger.billed) * 100) : 0
-  const month = spentIn(months, monthKey(today))
+  const spent = spentIn(months, monthKey(today))
+  // The summary's figures are the endpoint's too, and read the same way.
+  const month = { total: orZero(spent.total), entries: orZero(spent.entries) }
   const whole = ledger.raised >= ledger.total
 
   return [
@@ -158,6 +160,38 @@ export function financeFigures(ledger: Ledger, months: SpendingMonth[], today: D
       to: '/admin/spendings',
     },
   ]
+}
+
+/**
+ * The dashboard endpoint's counters, each one a number.
+ *
+ * Typed as numbers and not always sent as them: a counter the school leaves
+ * out arrives as `undefined`, which counted up and printed as "NaN" on the
+ * home page, and which `stats.applied > 0` quietly reads as false. Read once,
+ * here, so every tile below it draws 0 for a figure the school did not give.
+ */
+export function readStats(stats: Partial<Record<keyof DashboardStats, unknown>> | null | undefined): DashboardStats {
+  const source = stats ?? {}
+  const read = (key: keyof DashboardStats) => orZero(source[key])
+  return {
+    students: read('students'),
+    applied: read('applied'),
+    current_students: read('current_students'),
+    alumni: read('alumni'),
+    teachers: read('teachers'),
+    subjects: read('subjects'),
+    classes: read('classes'),
+    fees: read('fees'),
+    hostels: read('hostels'),
+    admins: read('admins'),
+    parents: read('parents'),
+    trequests: read('trequests'),
+    course_regs: read('course_regs'),
+    exams_count: read('exams_count'),
+    attendance_count: read('attendance_count'),
+    fees_collected: read('fees_collected'),
+    total_revenue: read('total_revenue'),
+  }
 }
 
 /** The four counts a head teacher looks at, from the dashboard endpoint. */

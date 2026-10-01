@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { amountInWords } from './amount-words.ts'
-import { formatNaira, parseNaira } from './format.ts'
+import { formatCount, formatNaira, orZero, parseNaira } from './format.ts'
 
 test('reads the figure out of a display string', () => {
   assert.equal(parseNaira('₦120,000'), 120_000)
@@ -28,4 +28,15 @@ test('shows kobo only when there are kobo', () => {
   assert.equal(formatNaira(30_000), '₦30,000')
   assert.equal(formatNaira(25_000.5), '₦25,000.50')
   assert.equal(formatNaira(0), '₦0')
+})
+
+test('a figure that is not a number prints as 0, never NaN', () => {
+  for (const bad of [undefined, null, Number.NaN, Infinity, 'n/a', {}]) {
+    assert.equal(orZero(bad), 0)
+    assert.equal(formatCount(bad as never), '0')
+    assert.equal(formatNaira(bad as never), formatNaira(0))
+  }
+  assert.equal(orZero('12000.00'), 12000)
+  assert.equal(orZero(7), 7)
+  assert.equal(formatCount(1234), '1,234')
 })

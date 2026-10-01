@@ -1,0 +1,16 @@
+# TSS EMS — the hashed bundles. Copied into assets/ by deploy/package.sh.
+#
+# Every name in this folder carries a hash of its own contents, so a file
+# never changes under its name: cache it for a year and never ask again.
+
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</IfModule>
+
+# No SPA fallback in here. A chunk that is not on the server — a tab still
+# running last week's build asking for a file the deploy replaced — must be a
+# 404, not the app's index.html sent back with a 200 and parsed as JavaScript,
+# which fails as a MIME error nobody can read.
+<IfModule mod_rewrite.c>
+  RewriteEngine Off
+</IfModule>

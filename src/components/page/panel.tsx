@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
  *
  * No border, but a shadow. The ground was meant to be what separates one card
  * from the next, and in daylight it does not: `--ems-ground` and
- * `--ems-raised` are #fafafa and #ffffff, a 2% difference that reads as one
+ * `--ems-raised` are #f6f8fc and #ffffff, a 2% difference that reads as one
  * flat page rather than a card standing on it. The shadow is what makes it a
  * card, in both themes and on either ground, without the border a page of
  * bordered cards would turn into a page of lines.
