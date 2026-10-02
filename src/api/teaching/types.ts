@@ -63,13 +63,9 @@ export type SetAssignment = {
   details: string | null
   subject_id: number
   department_id: number
-  /** 'cbt_test' on every assignment set so far. */
-  test_type: string | null
   status: string | null
-  total_questions: number | null
-  /** Minutes allowed once opened. Null on an assignment with no limit set. */
-  time_limit: number | null
-  passing_score: number | null
+  // No `test_type`, `total_questions`, `time_limit` or `passing_score`: they
+  // went to quizzes on 2026-10-02 (`../quizzes`).
   opendate: string | null
   closedate: string | null
   /** Expanded beside the assignment, so the subject needs no second call. */

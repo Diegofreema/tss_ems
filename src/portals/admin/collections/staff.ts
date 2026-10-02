@@ -1,3 +1,4 @@
+import { PHOTO_KEY } from '@/features/collections/photo-key'
 import { enqueue } from '@/db/drain'
 import type { WriteOutcome } from '@/db/write-outcome'
 import { SET, WRITE } from '@/db/ids'
@@ -531,6 +532,8 @@ export const staff: CollectionDef = {
   emptyBody: 'Add your teaching and office staff to assign subjects and arms.',
   noun: 'staff member',
   nameKey: 'name',
+  // The face beside the name, on the register and the record — see `photo-url.ts`.
+  photoKey: PHOTO_KEY,
   counts: [
     { label: 'Teachers', count: countTeachers },
     { label: ADMINISTRATORS, count: countAdmins },

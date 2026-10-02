@@ -5,7 +5,9 @@ import type { Admin } from '../../../api/users/types.ts'
 import { birthday, isoBirthday } from '../../../features/collections/birthday.ts'
 import { BLANK } from '../../../features/collections/blank.ts'
 import { countryIso } from '../../../features/collections/country-ids.ts'
+import { PHOTO_KEY } from '../../../features/collections/photo-key.ts'
 import type { Row } from '../../../features/collections/types.ts'
+import { officePhoto, staffPhoto } from '../../../lib/photo-url.ts'
 import { formatDate } from '../../../lib/format.ts'
 
 /**
@@ -106,6 +108,7 @@ export function teacherRow(teacher: Teacher): Row {
   return {
     id: staffKey('teacher', teacher.id),
     name: text(fullName(teacher.firstname, teacher.middlename, teacher.lastname)),
+    [PHOTO_KEY]: staffPhoto(teacher.passport),
     role: TEACHERS,
     phone: text(teacher.phone),
     gender: text(teacher.gender),
@@ -196,6 +199,8 @@ export function adminRow(admin: Admin, roles?: ReadonlyMap<string, string>): Row
   return {
     id: staffKey('admin', admin.id),
     name: text(fullName(admin.surname, admin.lastname)),
+    // The office's photos are in `img/`, not `staff_files/` — see `photo-url.ts`.
+    [PHOTO_KEY]: officePhoto(admin.adminphoto),
     // The list sends `role_id` and does not expand the role, so the name comes
     // from `/users/roles` — without it every office record read the same word.
     role: roleName(admin, roles),

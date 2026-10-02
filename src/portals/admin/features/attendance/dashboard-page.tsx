@@ -12,6 +12,8 @@ import { PageHeader } from '@/components/page/page-header'
 import { Rule } from '@/components/page/rule'
 import { TileStrip } from '@/components/page/tile-strip'
 import { Button } from '@/components/ui/button'
+import { useAccess } from '@/features/auth/access'
+import { mayOpen } from '@/features/auth/privileges'
 import { toTableColumns } from '@/features/collections/components/collection-columns'
 import { fromApiDate, toApiDate } from '@/features/collections/date-range'
 import type { Row } from '@/features/collections/types'
@@ -43,6 +45,7 @@ export function AttendanceDashboard() {
   // The day the endpoint answered for, which is today where none was asked
   // for — so the link and the heading below say the same day the table does.
   const answered = data?.date ?? date
+  const access = useAccess()
 
   const header = (
     <>
@@ -51,15 +54,19 @@ export function AttendanceDashboard() {
         title="Attendance"
         description="The registers taken on one day, class by class. Marks are entered by the form teacher; this page only reads them."
         action={
-          <Button asChild variant="outline">
-            <Link
-              to="/admin/att-report"
-              search={answered ? { start: answered, end: answered } : {}}
-            >
-              Open the full report
-              <ChevronRight className="size-3.5" strokeWidth={2} />
-            </Link>
-          </Button>
+          // Asked rather than assumed, though both pages are Attendance's
+          // today: a door is drawn only onto a page this account may open.
+          mayOpen(access, '/admin/att-report') && (
+            <Button asChild variant="outline">
+              <Link
+                to="/admin/att-report"
+                search={answered ? { start: answered, end: answered } : {}}
+              >
+                Open the full report
+                <ChevronRight className="size-3.5" strokeWidth={2} />
+              </Link>
+            </Button>
+          )
         }
       />
       <Rule />

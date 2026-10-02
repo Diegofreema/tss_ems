@@ -8,7 +8,6 @@ const ASSIGNMENT: Assignment = {
   id: 6,
   title: 'Simple additions',
   details: 'Please attempt all questions',
-  test_type: 'cbt_test',
   status: 'active',
   subject_id: 2,
   subject: 'MATHEMATICS',
@@ -16,9 +15,6 @@ const ASSIGNMENT: Assignment = {
   class: 'SSS I',
   opendate: '2026-08-27T10:03:00+01:00',
   closedate: '2026-08-28T10:08',
-  time_limit: null,
-  total_questions: 4,
-  passing_score: 30,
   question_count: 1,
   my_status: 'submitted',
   submitted: true,
@@ -66,8 +62,9 @@ test('a row carries the assignment as the list and the assignment page show it',
   assert.equal(row.title, 'Simple additions')
   assert.equal(row.subject, 'MATHEMATICS')
   assert.equal(row.klass, 'SSS I')
-  assert.equal(row.minutes, 'No limit')
-  assert.equal(row.pass, '30%')
+  // A quiz's fields since 2026-10-02, so nothing of them on an assignment's row.
+  assert.equal('minutes' in row, false)
+  assert.equal('pass' in row, false)
   assert.equal(row.state, 'Submitted')
   // Word for word, so a student quoting it is quoting the school.
   assert.equal(row.why, 'This test has closed.')
@@ -113,5 +110,4 @@ test('an assignment with nothing filled in is still nameable', () => {
   assert.equal(row.title, 'Assignment 9')
   assert.equal(row.questions, '—')
   assert.equal(row.subject, '—')
-  assert.equal(row.pass, '—')
 })

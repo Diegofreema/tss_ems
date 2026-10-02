@@ -1,5 +1,5 @@
 import type { CollectionDef } from '@/features/collections/types'
-import { assignments, results } from './assessment'
+import { assignments, quizzes, results } from './assessment'
 import { attendance } from './attendance'
 import { invoices } from './finance'
 import { courses, materials, timetable } from './learning'
@@ -12,6 +12,7 @@ export const studentCollections = {
   library,
   timetable,
   assignments,
+  quizzes,
   results,
   attendance,
   invoices,

@@ -66,6 +66,12 @@ export type Child = {
   department_id: number | null
   department: string | null
   class_arm: string | null
+  /**
+   * The stored photo's filename, where the school sends it. Not in the
+   * documented answer of `sparents/my-children`, so read when present and
+   * nothing is drawn from its absence but the child's initials.
+   */
+  passporturl?: string | null
 }
 
 /**
@@ -169,8 +175,11 @@ export type ChildAttendanceParams = {
 }
 
 /**
- * One computer-based test set for a child's class, and where that child
- * stands on it.
+ * One assignment set for a child's class, and where that child stands on it.
+ *
+ * Written work since 2026-10-02, when quizzes became their own papers: there
+ * is no time allowed on an assignment any more, so `time_limit` is null on
+ * every row the school still sends it on, and nothing reads it.
  *
  * The two stamps are the same wall clock written two ways — `opendate` carries
  * `+00:00` while `closedate` carries no zone at all, and the sample sends both
@@ -182,11 +191,11 @@ export type ChildAssignment = {
   setassignment_id: number
   title: string | null
   subject: string | null
-  /** Minutes allowed once opened. Null on an assignment with no limit set. */
-  time_limit: number | null
+  /** Gone with quizzes on 2026-10-02 — null where it is still sent. Not read. */
+  time_limit?: number | null
   opendate: string | null
   closedate: string | null
-  /** 'available' until the child sits it, then 'completed'. */
+  /** `available` until the child starts it, `in_progress` while they are on it, then `completed`. */
   status: string
   /** The child's own sitting, once there is one. Null while unsat. */
   assignment_id: number | null

@@ -1,3 +1,4 @@
+import { PHOTO_KEY } from '@/features/collections/photo-key'
 import { myFamilyKeys } from '@/api/parents/keys'
 import { myFamilyService } from '@/api/parents/service'
 import type { ChildAssignments } from '@/api/parents/types'
@@ -30,6 +31,7 @@ export function childrenFor(family: Child[]): CollectionDef {
       'Link a child to see their results, attendance and fees in one place.',
     noun: 'child',
     nameKey: 'name',
+    photoKey: PHOTO_KEY,
     // No sub-tables: the API keeps no history a parent may read, and the
     // placeholder in its place would be invented audit entries.
     tabs: [],
@@ -44,6 +46,7 @@ export function childrenFor(family: Child[]): CollectionDef {
     rows: family.map((child) => ({
       id: String(child.id),
       name: child.full,
+      [PHOTO_KEY]: child.photo ?? '',
       arm: child.arm,
       adm: child.adm,
       owing: formatNaira(child.owing),
@@ -140,12 +143,12 @@ export function assignmentsFor(child: Child): CollectionDef {
   return {
     id: 'assignments',
     path: '/parent/assignments',
-    // Six fields and no sub-tables: the record opens over the register.
+    // Five fields and no sub-tables: the record opens over the register.
     modal: true,
     scope: child.adm,
     kicker: 'Assignments',
     title: `Assignments for ${child.name}`,
-    description: `Assignments set for ${child.name}'s class, and where they stand on each. An assignment is answered by the student in their own portal and marked by their teacher; this is where each one stands.`,
+    description: `Written work set for ${child.name}'s class, and where they stand on each. An assignment is answered by the student in their own portal and marked by their teacher. Quizzes are not listed here — the school tells the family when one opens, under Notifications.`,
     // A parent cannot open an assignment on their child's behalf, so the list offers
     // no button rather than one that opens nothing.
     action: 'Open the assignment',
@@ -170,7 +173,6 @@ export function assignmentsFor(child: Child): CollectionDef {
       { key: 'state', label: 'State' },
       { key: 'opens', label: 'Opens' },
       { key: 'closes', label: 'Closes' },
-      { key: 'limit', label: 'Time allowed' },
     ],
     // Searched and paged here: the endpoint answers with the household whole
     // and takes neither a page nor a query.

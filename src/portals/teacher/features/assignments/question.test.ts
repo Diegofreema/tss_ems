@@ -5,6 +5,7 @@ import {
   blankQuestion,
   correctAnswer,
   correctIndex,
+  kindsFor,
   NO_ANSWER,
   questionBody,
   questionReview,
@@ -79,6 +80,7 @@ test('with nothing marked, no option is sent as the right one', () => {
   // the answer key by arithmetic.
   const body = questionBody({
     ...blankQuestion(),
+    question_type: 'multiple_choice',
     question_text: 'Pick one',
     options: [{ option_text: 'a' }, { option_text: 'b' }],
   })
@@ -101,6 +103,7 @@ test('what is sent back marks the right option and only that one', () => {
 test('a blank choice is left out, and the answer keeps its place', () => {
   const body = questionBody({
     ...blankQuestion(),
+    question_type: 'multiple_choice',
     question_text: 'Pick one',
     options: [{ option_text: 'a' }, { option_text: '  ' }, { option_text: 'c' }],
     correct: '2',
@@ -126,7 +129,7 @@ test('a theory question sends no options at all', () => {
 })
 
 test('an unrecognised kind reads as the kind every assignment has held', () => {
-  assert.equal(typeLabel('theory'), 'Theory')
+  assert.equal(typeLabel('theory'), 'Written answer')
   assert.equal(typeLabel(null), 'Multiple choice')
 })
 
@@ -158,7 +161,7 @@ test('the read-back ticks the choice the school will mark right', () => {
 test('a theory question is read back with no choices at all', () => {
   const review = questionReview({ ...TYPED, question_type: 'theory' })
   assert.deepEqual(review.choices, [])
-  assert.equal(review.kind, 'Theory')
+  assert.equal(review.kind, 'Written answer')
   assert.match(review.marking, /you mark this one yourself/i)
 })
 
@@ -170,4 +173,10 @@ test('with no answer marked, the read-back ticks nothing', () => {
 test('the read-back reads points through the same filter the body does', () => {
   assert.equal(questionReview({ ...TYPED, points: '4kg' }).points, 4)
   assert.equal(questionReview({ ...TYPED, points: '' }).points, 0)
+})
+
+test('a new question on an assignment is written work, and only an old one offers multiple choice', () => {
+  assert.equal(blankQuestion().question_type, 'theory')
+  assert.deepEqual(kindsFor('theory'), ['theory'])
+  assert.deepEqual(kindsFor('multiple_choice'), ['theory', 'multiple_choice'])
 })

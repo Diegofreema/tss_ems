@@ -63,8 +63,33 @@ export type PortalConfig = {
    * calls it once per render and knows the difference nowhere.
    */
   useNotifications: () => Notification[]
+  /**
+   * Whether the signed-in account may open a path, read as a hook. Only the
+   * office has one: an administrator is granted sections of the portal one at
+   * a time, and the rail, the header and the page itself offer only those.
+   * Every other portal opens all of itself to whoever it lets in.
+   */
+  useMayOpen?: () => (path: string) => boolean
+  /** What a page closed by `useMayOpen` says, for the path that was asked for. */
+  closedBecause?: (path: string) => string
   /** Where the in-shell 404 points; the design tailors these per role. */
   notFoundLinks: NotFoundLink[]
   /** Who "usually wants" those links, e.g. "teachers". */
   notFoundAudience: string
+}
+
+/**
+ * The rail's own name for a page, which is the name the person knows it by —
+ * "Students · Enrolled" for anything under `/admin/students`, record pages
+ * included. "This page" where the rail has never listed it.
+ */
+export function navLabel(portal: Pick<PortalConfig, 'basePath' | 'nav'>, path: string): string {
+  const pathname = path.split(/[?#]/)[0]
+  const segment = pathname.slice(portal.basePath.length).split('/').filter(Boolean)[0]
+  const to = segment ? `${portal.basePath}/${segment}` : portal.basePath
+  for (const group of portal.nav) {
+    const item = group.items.find((one) => one.to === to)
+    if (item) return group.heading ? `${group.heading} · ${item.label}` : item.label
+  }
+  return 'This page'
 }

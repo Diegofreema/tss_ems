@@ -1,4 +1,6 @@
 import { Link } from '@tanstack/react-router'
+import { useAccess } from '@/features/auth/access'
+import { mayOpen } from '@/features/auth/privileges'
 import { Lock, Search } from 'lucide-react'
 import { parseAsString, useQueryStates } from 'nuqs'
 import { useSearch } from '@/api/search/hooks'
@@ -62,7 +64,12 @@ export function AdminSearchPage() {
   })
 
   const asked = settled.trim().length >= MIN_TERM
-  const found = groups(data)
+  // The registers this account may open, and no others: a hit is a link to
+  // its record, and a column of links onto "you cannot open this" is a column
+  // nobody should have been shown. The school's own `searched` still decides
+  // the ones it left out.
+  const access = useAccess()
+  const found = groups(data).filter((group) => mayOpen(access, group.to))
 
   return (
     <div>

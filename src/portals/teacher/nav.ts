@@ -6,6 +6,7 @@ import {
   CalendarSearch,
   ClipboardCheck,
   FileQuestion,
+  ListChecks,
   LayoutGrid,
   MessageSquare,
   MessagesSquare,
@@ -59,13 +60,16 @@ export const teacherNav: NavGroup[] = [
       // sheet is a subject and an arm the teacher chooses, not a record that
       // exists until it is filed — and a number here would be invented.
       { to: '/teacher/scores', label: 'Enter scores', icon: PenLine },
-      // No badge either: what would be worth counting here is the assignments still
-      // holding no questions, and the register counts those on its own tiles.
+      // No badge either: the register counts what is open and handed in on
+      // its own tiles.
       {
         to: '/teacher/assignments',
         label: 'Assignments',
         icon: FileQuestion,
       },
+      // Split off assignments on 2026-10-02: objective papers that mark
+      // themselves. An assignment is written work the teacher marks.
+      { to: '/teacher/quizzes', label: 'Quizzes', icon: ListChecks },
       { to: '/teacher/uploads', label: 'Upload batches', icon: Upload },
       { to: '/teacher/results', label: 'Browse results', icon: SquareCheckBig },
       { to: '/teacher/performance', label: 'Performance', icon: TrendingUp },

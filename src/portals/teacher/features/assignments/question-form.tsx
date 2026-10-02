@@ -12,6 +12,7 @@ import { useRecordForm } from '@/hooks/use-record-form'
 import { cn } from '@/lib/utils'
 import {
   correctIndex,
+  kindsFor,
   MAX_OPTIONS,
   MIN_OPTIONS,
   NO_ANSWER,
@@ -29,10 +30,6 @@ import {
  * not lose what they typed.
  */
 
-const CHOICES = [
-  { value: 'multiple_choice', label: TYPE_LABEL.multiple_choice },
-  { value: 'theory', label: TYPE_LABEL.theory },
-]
 
 const schema = z
   .object({
@@ -91,6 +88,12 @@ export function QuestionForm({
 }) {
   const form = useRecordForm<QuestionValues>(schema, values)
   const kind = form.watch('question_type')
+  // Decided by the question as it opened, not as it is now: switching an old
+  // multiple-choice question to written work and back must stay possible.
+  const choices = kindsFor(values.question_type).map((value) => ({
+    value,
+    label: TYPE_LABEL[value],
+  }))
 
   return (
     <FormProvider {...form}>
@@ -114,7 +117,7 @@ export function QuestionForm({
             name="question_type"
             label="Kind"
             required
-            options={CHOICES}
+            options={choices}
             hint={
               kind === 'theory'
                 ? 'You mark this one yourself once the assignment is sat.'

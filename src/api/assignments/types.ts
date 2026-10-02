@@ -5,17 +5,16 @@
  * flattens them, unlike every other list on the API. Read them as the strings
  * they are.
  *
- * Two fields count the same thing and disagree: `total_questions` is what the
- * teacher said the assignment would hold when they set it, and `question_count` is
- * how many questions they have actually written. Assignment 6 says 4 and 1. The
- * student is shown the second — an assignment says "1 question" and holds one.
+ * Written work, as of 2026-10-02: the teacher sets it and reads it. The four
+ * fields that only meant anything on a self-marking paper — `test_type`,
+ * `time_limit`, `passing_score` and `total_questions` — went to quizzes
+ * (`../quizzes`), which are their own record now. `question_count` stays: it
+ * is how many questions are actually written on this one.
  */
 export type Assignment = {
   id: number
   title?: string | null
   details?: string | null
-  /** `cbt_test` on every assignment so far; the school's own word for the kind. */
-  test_type?: string | null
   /** The teacher's own state for the assignment, e.g. `active`. Not the student's. */
   status?: string | null
   subject_id?: number | null
@@ -29,10 +28,6 @@ export type Assignment = {
    * see `schoolTime`.
    */
   closedate?: string | null
-  /** Minutes allowed once started. Null means the window is the only limit. */
-  time_limit?: number | null
-  total_questions?: number | null
-  passing_score?: number | null
   question_count?: number | null
   my_status?: AssignmentStatus | null
   submitted?: boolean | null

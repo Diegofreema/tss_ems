@@ -1,7 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { portalNotFound } from '@/components/feedback/portal-not-found'
 import { shellPending } from '@/components/feedback/shell-pending'
 import { AppShell } from '@/components/layout/app-shell'
+import { currentAccess, readyPrivileges } from '@/features/auth/access'
+import { mayOpen } from '@/features/auth/privileges'
 import { requirePortal } from '@/features/auth/guard'
 import { messageCollections } from '@/db/collections/messages'
 import { referenceCollections } from '@/db/collections/reference'
@@ -9,7 +11,28 @@ import { recordSearch } from '@/features/collections/resolve'
 import { adminPortal } from '@/portals/admin/config'
 
 export const Route = createFileRoute('/admin')({
-  beforeLoad: ({ context }) => requirePortal(context.queryClient, 'Admin'),
+  /*
+   * Which sections of the portal this account was granted, before the rail is
+   * drawn from them. Awaited only on a device that has never been told — and
+   * `readyPrivileges` swallows its own failures, so a school that cannot be
+   * reached leaves the kept copy in charge rather than taking the shell down.
+   */
+  beforeLoad: async ({ context, location }) => {
+    await requirePortal(context.queryClient, 'Admin')
+    await readyPrivileges()
+    /*
+     * And a page this account was not granted is never loaded at all. This
+     * runs before any child route's loader, so redirecting here is what keeps
+     * a register the school did not open to them from being asked for and
+     * written onto the device behind a closed screen. A redirect is not one
+     * of the throws a shell must not make: it never reaches an error boundary.
+     * The shell's own check of the outlet stays, for a privilege taken away
+     * while a page is already open.
+     */
+    if (!mayOpen(currentAccess(), location.pathname)) {
+      throw redirect({ to: '/admin/closed', search: { from: location.href }, replace: true })
+    }
+  },
   // `?record=` opens a thin collection's record modal over its list page.
   validateSearch: recordSearch,
   /**

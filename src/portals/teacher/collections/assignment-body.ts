@@ -4,10 +4,12 @@ import { toSchoolStamp } from '../../../features/collections/when.ts'
 /**
  * What the assignment form submits.
  *
- * `test_type` is not asked for. Every assignment the API has ever sent is a
- * `cbt_test`, and it is the only kind the student's portal can sit — offering a
- * dropdown of one choice, or of kinds nobody has seen the school accept, would
- * be inventing a decision the teacher does not have.
+ * An assignment is written work the teacher reads and marks. It used to be
+ * one row of two kinds — `test_type` told a CBT from an assignment, and a CBT
+ * carried a time limit and a pass mark — and as of 2026-10-02 the objective
+ * paper is a quiz of its own (`api/quizzes`). So none of `test_type`,
+ * `time_limit`, `passing_score` or `total_questions` is sent: the school
+ * dropped the columns and ignores them.
  *
  * The window **is** asked for now. It was not: the API took neither date and
  * the school filled the closing time in itself, which is why every paper on
@@ -16,10 +18,9 @@ import { toSchoolStamp } from '../../../features/collections/when.ts'
  * empty goes as null, which is the school's own "no bound" rather than a
  * window that shuts immediately.
  */
-const TEST_TYPE = 'cbt_test'
 
-/** A figure the teacher left blank is null — the API's own "no limit". */
-function figure(value: unknown): number | null {
+/** A box left empty is null — for the arm, the school's own "every arm of the class". */
+function idOrNull(value: unknown): number | null {
   const digits = String(value ?? '').replace(/[^0-9]/g, '')
   return digits ? Number(digits) : null
 }
@@ -35,11 +36,9 @@ function wholeBody(values: Record<string, unknown>, status?: string): Assignment
   return {
     subject_id: Number(values.subject_id),
     department_id: Number(values.department_id),
+    class_arm_id: idOrNull(values.class_arm_id),
     title: String(values.title ?? '').trim(),
     details: String(values.details ?? '').trim(),
-    test_type: TEST_TYPE,
-    time_limit: figure(values.time_limit),
-    passing_score: figure(values.passing_score),
     opendate: toSchoolStamp(String(values.opens_at ?? '')),
     closedate: toSchoolStamp(String(values.closes_at ?? '')),
     // Carried through on an edit rather than set: nothing in this portal
@@ -56,10 +55,9 @@ const UNDER: Record<string, (keyof AssignmentBody)[]> = {
   opendate: ['opendate'],
   title: ['title'],
   details: ['details'],
-  time_limit: ['time_limit'],
-  passing_score: ['passing_score'],
   subject_id: ['subject_id'],
   department_id: ['department_id'],
+  class_arm_id: ['class_arm_id'],
 }
 
 export function assignmentBody(
@@ -92,7 +90,6 @@ export function assignmentBody(
     subject_id: whole.subject_id,
     department_id: whole.department_id,
     title: whole.title,
-    test_type: TEST_TYPE,
   }
   for (const field of editable) {
     for (const key of UNDER[field] ?? []) {

@@ -9,6 +9,8 @@ import { BLANK } from '../../../features/collections/blank.ts'
 import { birthday } from '../../../features/collections/birthday.ts'
 import { mark } from '../../../features/collections/mark.ts'
 import type { Row } from '../../../features/collections/types.ts'
+import { PHOTO_KEY } from '../../../features/collections/photo-key.ts'
+import { studentPhoto } from '../../../lib/photo-url.ts'
 import { when } from '../../../features/collections/when.ts'
 
 function text(value: string | null | undefined): string {
@@ -52,6 +54,8 @@ export function studentRow(student: TeacherStudent): Row {
     id: String(student.id),
     adm: text(student.regno ?? student.application_no),
     name: text([student.fname, student.mname, student.lname].filter(Boolean).join(' ')),
+    // Fetched through the API with the teacher's token — see `photo-url.ts`.
+    [PHOTO_KEY]: studentPhoto(student.passporturl),
     arm: text(student.class_arm?.arm_name),
     klass: text(student.department?.name),
     status: text(student.studentstatus ?? student.status),

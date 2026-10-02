@@ -3,9 +3,11 @@ import { Lock } from 'lucide-react'
 import { Rule } from '@/components/page/rule'
 import { Button } from '@/components/ui/button'
 
-const ROWS = (pageName: string) => [
+const ASK = 'The school office — 0803 000 0000'
+
+const ROWS = (pageName: string, ask: string) => [
   { label: 'Page', value: pageName },
-  { label: 'Ask', value: 'The school office — 0803 000 0000' },
+  { label: 'Ask', value: ask },
 ]
 
 const PRIVILEGE_BODY =
@@ -15,14 +17,18 @@ const PRIVILEGE_BODY =
 export function DeniedState({
   pageName,
   body = PRIVILEGE_BODY,
+  ask = ASK,
   dashboardPath,
   onRequestAccess,
 }: {
   pageName: string
   /** Why it is closed, where it is not the ordinary want of a privilege. */
   body?: string
+  /** Who can open it, where that is not the school office. */
+  ask?: string
   dashboardPath: string
-  onRequestAccess: () => void
+  /** Left out where there is nobody to ask from here; the button goes too. */
+  onRequestAccess?: () => void
 }) {
   return (
     <div className="mx-auto w-full max-w-[580px] py-10">
@@ -33,7 +39,7 @@ export function DeniedState({
       <p className="mt-2.5 text-sm text-muted-foreground">{body}</p>
 
       <div className="mt-4.5 border-t border-divider-strong">
-        {ROWS(pageName).map((row) => (
+        {ROWS(pageName, ask).map((row) => (
           <div
             key={row.label}
             className="flex gap-4 border-b border-divider px-0.5 py-3"
@@ -51,9 +57,11 @@ export function DeniedState({
         <Button asChild>
           <Link to={dashboardPath}>Back to dashboard</Link>
         </Button>
-        <Button variant="outline" onClick={onRequestAccess}>
-          Request access
-        </Button>
+        {onRequestAccess && (
+          <Button variant="outline" onClick={onRequestAccess}>
+            Request access
+          </Button>
+        )}
       </div>
     </div>
   )

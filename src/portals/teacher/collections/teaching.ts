@@ -1,3 +1,4 @@
+import { PHOTO_KEY } from '@/features/collections/photo-key';
 import { enqueue } from '@/db/drain';
 import { SET, WRITE } from '@/db/ids';
 import { newLocalKey } from '@/db/outbox';
@@ -143,6 +144,8 @@ export const students: CollectionDef = {
     'Students appear here once the office has placed them in an arm you take.',
   noun: 'student',
   nameKey: 'name',
+  // The face beside the name, as the office's register draws it.
+  photoKey: PHOTO_KEY,
   counts: [
     { label: 'Students', count: async () => (await myStudents()).length },
     // The arms come back beside the roll rather than on it, which is the only

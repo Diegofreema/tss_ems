@@ -1,3 +1,5 @@
+import { PHOTO_KEY } from '@/features/collections/photo-key'
+import { officeHolds } from '@/features/auth/access'
 import type { Parent } from '@/api/parents/types'
 import type { Student } from '@/api/students/types'
 import { heldRows } from '@/db/collection'
@@ -319,6 +321,9 @@ export const students: CollectionDef = {
   tabs: [
     {
       label: 'Fees',
+      // A child's bills are the Fees and Payments section's, like the rest of
+      // the money; a registrar without it opens the record and not the ledger.
+      when: () => officeHolds('fees'),
       columns: [
         { key: 'invoice', label: 'Invoice' },
         { key: 'fee', label: 'Fee' },
@@ -329,6 +334,7 @@ export const students: CollectionDef = {
     },
     {
       label: 'Results',
+      when: () => officeHolds('result'),
       // Approved results only — that is all this endpoint returns.
       columns: [
         { key: 'subject', label: 'Subject' },
@@ -350,6 +356,8 @@ export const students: CollectionDef = {
   emptyBody: 'Enrol your first student, or admit one from the applicants list.',
   noun: 'student',
   nameKey: 'name',
+  // The face beside the name, on the register and the record — see `photo-url.ts`.
+  photoKey: PHOTO_KEY,
   // Counted off the device, from the same set the register draws.
   counts: [
     { label: 'Enrolled', count: countHeld((one) => one.status === 'Admitted') },
@@ -530,6 +538,8 @@ export const applicants: CollectionDef = {
     'Applications appear here as families submit them through the admission form.',
   noun: 'application',
   nameKey: 'name',
+  // The face beside the name, on the register and the record — see `photo-url.ts`.
+  photoKey: PHOTO_KEY,
   // Counted off the device, from the same set the queue is drawn from.
   counts: [
     { label: 'Awaiting review', count: countHeld((one) => one.status === APPLIED) },

@@ -5,7 +5,6 @@ import {
   answeredCount,
   isAnswered,
   isTheory,
-  limitSeconds,
   assignmentFields,
   assignmentMeta,
   questionsOf,
@@ -43,9 +42,6 @@ const ASSIGNMENT: AssignmentDetail = {
     class: 'SSS I',
     opendate: '2026-08-27T10:03:00+01:00',
     closedate: '2026-08-28T10:08',
-    time_limit: null,
-    total_questions: 4,
-    passing_score: 30,
     // All four nulled on this route, whatever the list said.
     question_count: null,
     my_status: null,
@@ -103,28 +99,23 @@ test('the start time carries the wall clock and no zone', () => {
   assert.match(startedAt(new Date('2026-01-02T03:04:05')), /^2026-01-02T03:04:05$/)
 })
 
-test('an assignment with no time limit runs no clock', () => {
-  assert.equal(limitSeconds(ASSIGNMENT), null)
-  assert.equal(limitSeconds({ ...ASSIGNMENT, assignment: { id: 6, time_limit: 25 } }), 1500)
-})
-
 test('the brief counts the questions sent, since the count field is null here', () => {
   assert.equal(questionsOf(ASSIGNMENT).length, 1)
-  assert.equal(assignmentMeta(ASSIGNMENT), 'MATHEMATICS · SSS I · 1 question · no time limit · one attempt')
+  assert.equal(assignmentMeta(ASSIGNMENT), 'MATHEMATICS · SSS I · 1 question · one attempt')
 
   const fields = Object.fromEntries(assignmentFields(ASSIGNMENT).map((one) => [one.label, one.value]))
   assert.equal(fields.Questions, '1')
-  assert.equal(fields['Time allowed'], 'No limit')
-  assert.equal(fields['Pass mark'], '30%')
+  // A quiz's terms since 2026-10-02 — an assignment has neither.
+  assert.equal('Time allowed' in fields, false)
+  assert.equal('Pass mark' in fields, false)
   assert.equal(fields.Closes, '28 Aug 2026, 10:08')
 })
 
-/** An assignment that shuts sooner than its own time limit would run out. */
+/** An assignment that shuts at nine. */
 const CLOSING: AssignmentDetail = {
   assignment: {
     id: 90,
     title: 'Mid Term Test',
-    time_limit: 30,
     closedate: '2026-09-23 09:00:00',
   },
   questions: [],
@@ -132,33 +123,14 @@ const CLOSING: AssignmentDetail = {
 
 const NINE = Date.parse('2026-09-23T09:00:00')
 
-test('a student starting near the close is told the clock is the window, not the limit', () => {
-  // The trap this exists for: `attemptExpiry` takes the earlier of the two, so
-  // starting ten minutes before the close gives ten minutes — while the terms
-  // above still read "Time allowed: 30 minutes".
-  const note = windowNote(CLOSING, NINE - 10 * 60_000)
-  assert.match(note ?? '', /10 minutes/)
-  assert.match(note ?? '', /not 30/)
-})
-
-test('a window wider than the time allowed says nothing — the limit is the bound', () => {
-  assert.equal(windowNote(CLOSING, NINE - 90 * 60_000), null)
-})
-
-test('an assignment with no limit is bounded by its window, and says so', () => {
-  const note = windowNote(
-    { ...CLOSING, assignment: { ...CLOSING.assignment, time_limit: null } },
-    NINE - 45 * 60_000,
-  )
+test('an assignment is bounded by its window alone, and says so', () => {
+  const note = windowNote(CLOSING, NINE - 45 * 60_000)
   assert.match(note ?? '', /45 minutes/)
   assert.match(note ?? '', /no other time limit/i)
 })
 
 test('an hour and a half is said the way somebody would say it', () => {
-  const note = windowNote(
-    { ...CLOSING, assignment: { ...CLOSING.assignment, time_limit: null } },
-    NINE - 90 * 60_000,
-  )
+  const note = windowNote(CLOSING, NINE - 90 * 60_000)
   assert.match(note ?? '', /1 hour and 30 minutes/)
 })
 

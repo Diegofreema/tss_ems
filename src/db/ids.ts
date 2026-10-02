@@ -26,6 +26,14 @@ export const SET = {
   teachingQuestions: 'teaching.questions',
   teachingSubmissions: 'teaching.submissions',
   teachingScripts: 'teaching.scripts',
+  /** The quizzes a teacher has set — `GET /quizzes`. */
+  teachingQuizzes: 'teaching.quizzes',
+  /** Each quiz read whole — questions, answer key and what blocks publishing. */
+  teachingQuizRecords: 'teaching.quiz-records',
+  /** Who sat each quiz, and the summary over them. */
+  teachingQuizSittings: 'teaching.quiz-sittings',
+  /** What this teacher may set a quiz for — `GET /quizzes/options`. */
+  teachingQuizOptions: 'teaching.quiz-options',
 
   refClasses: 'reference.classes',
   refClassCensus: 'reference.class-census',
@@ -52,6 +60,7 @@ export const SET = {
   schoolingMaterials: 'schooling.materials',
   schoolingContent: 'schooling.content',
   schoolingAssignments: 'schooling.assignments',
+  schoolingQuizzes: 'schooling.quizzes',
   schoolingResults: 'schooling.results',
   schoolingAttendance: 'schooling.attendance',
   schoolingInvoices: 'schooling.invoices',
@@ -140,6 +149,13 @@ export const WRITE = {
   updateQuestion: 'assessment.updateQuestion',
   removeQuestion: 'assessment.removeQuestion',
   gradeSubmission: 'assessment.gradeSubmission',
+  createQuiz: 'quizzes.create',
+  updateQuiz: 'quizzes.update',
+  removeQuiz: 'quizzes.remove',
+  publishQuiz: 'quizzes.publish',
+  addQuizQuestion: 'quizzes.addQuestion',
+  updateQuizQuestion: 'quizzes.updateQuestion',
+  removeQuizQuestion: 'quizzes.removeQuestion',
   startConversation: 'messages.start',
   replyToConversation: 'messages.reply',
   messageAdmin: 'teaching.messageAdmin',

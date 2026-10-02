@@ -8,6 +8,7 @@ import {
   ClipboardCheck,
   CreditCard,
   LayoutGrid,
+  ListChecks,
   SquareCheckBig,
   TrendingUp,
   Wallet,
@@ -44,6 +45,8 @@ export const studentNav: NavGroup[] = [
         label: 'Assignments',
         icon: SquareCheckBig,
       },
+      // Split off assignments on 2026-10-02: papers that mark themselves.
+      { to: '/student/quizzes', label: 'Quizzes', icon: ListChecks },
       { to: '/student/results', label: 'My results', icon: ChartLine },
       { to: '/student/performance', label: 'My progress', icon: TrendingUp },
     ],

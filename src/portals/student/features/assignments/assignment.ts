@@ -3,7 +3,6 @@ import type {
   Question,
   SubmitAssignmentBody,
 } from '../../../../api/assignments/types.ts'
-import { BLANK } from '../../../../features/collections/blank.ts'
 import { schoolMillis, schoolTime, when } from '../../../../features/collections/when.ts'
 import { hasText } from '../../../../features/collections/rich-text.ts'
 import { text } from '../../../../features/profile/record.ts'
@@ -85,12 +84,6 @@ export function submitBody(
   return { answers, actual_start_time: startedAt(openedAt) }
 }
 
-/** How long the student has, in seconds, where the assignment sets a limit at all. */
-export function limitSeconds(assignment: AssignmentDetail | undefined): number | null {
-  const minutes = assignment?.assignment?.time_limit
-  return minutes ? minutes * 60 : null
-}
-
 /**
  * Why the assignment cannot be sat, if it cannot.
  *
@@ -109,7 +102,6 @@ export function assignmentMeta(detail: AssignmentDetail | undefined): string {
     assignment?.subject?.trim(),
     assignment?.class?.trim(),
     `${questions} question${questions === 1 ? '' : 's'}`,
-    assignment?.time_limit ? `${assignment.time_limit} minutes` : 'no time limit',
     'one attempt',
   ]
     .filter(Boolean)
@@ -130,16 +122,8 @@ export function assignmentFields(
     { label: 'Subject', value: text(assignment?.subject) },
     { label: 'Set for', value: text(assignment?.class) },
     { label: 'Questions', value: String(questionsOf(detail).length) },
-    {
-      label: 'Time allowed',
-      value: assignment?.time_limit ? `${assignment.time_limit} minutes` : 'No limit',
-    },
     { label: 'Opens', value: when(schoolTime(assignment?.opendate), true) },
     { label: 'Closes', value: when(schoolTime(assignment?.closedate), true) },
-    {
-      label: 'Pass mark',
-      value: assignment?.passing_score == null ? BLANK : `${assignment.passing_score}%`,
-    },
   ]
 }
 
@@ -156,16 +140,13 @@ function spell(minutes: number): string {
  * What the closing time means for somebody about to press Start, beyond the
  * two dates already listed above it.
  *
- * **The window cuts the clock short, and nothing said so.** `attemptExpiry`
- * takes the earlier of "the time allowed" and "when the assignment shuts", so a
- * student starting a thirty-minute paper ten minutes before it closes gets
- * ten — while the terms above them still read "Time allowed: 30 minutes".
- * That is the app telling them something untrue at the one moment it matters,
- * and they find out when the clock runs out two thirds of the way through.
+ * An assignment has no time allowed of its own any more — that went to
+ * quizzes on 2026-10-02 — so it is bounded by its window and nothing else,
+ * and the window *is* the clock. Worth saying in words: "Closes 23 Sep, 09:00"
+ * does not tell a student starting at 08:15 that they have forty-five minutes.
  *
- * Null when there is nothing worth saying: no closing time, one already past
- * (the school refuses the sitting and says so itself), or a window wide enough
- * that the time allowed is the real bound.
+ * Null when there is nothing worth saying: no closing time, or one already
+ * past (the school refuses the sitting and says so itself).
  */
 export function windowNote(
   detail: AssignmentDetail | undefined,
@@ -180,14 +161,5 @@ export function windowNote(
   // refusal is the thing to show, not a countdown.
   if (left <= 0) return null
 
-  const limit = assignment?.time_limit ?? null
-  if (limit && left < limit) {
-    return `This assignment shuts in ${spell(left)}, which is less than the ${limit} minutes it allows. The clock stops when it shuts, so starting now gives you about ${spell(left)}, not ${limit}.`
-  }
-
-  // Worth saying without a limit too: an assignment with no time limit is
-  // bounded by its window and nothing else, so the window *is* the clock.
-  if (!limit) return `This assignment shuts in ${spell(left)}. There is no other time limit, so that is how long you have.`
-
-  return null
+  return `This assignment shuts in ${spell(left)}. There is no other time limit, so that is how long you have.`
 }

@@ -43,11 +43,13 @@ export type ListPath =
   | '/teacher/results'
   | '/teacher/assignments'
   | '/teacher/submissions'
+  | '/teacher/quizzes'
   | '/student/courses'
   | '/student/library'
   | '/student/materials'
   | '/student/timetable'
   | '/student/assignments'
+  | '/student/quizzes'
   | '/student/results'
   | '/student/attendance'
   | '/student/invoices'
@@ -95,6 +97,7 @@ export type CrumbLink =
 /** Where a list's primary action goes when it is not a create form. */
 export type ActionPath =
   | '/teacher/questions'
+  | '/teacher/quiz'
   | '/admin/arms'
   | '/admin/classes'
   | '/admin/calendar'
@@ -719,6 +722,13 @@ export type CollectionDef = {
   detail?: DetailFieldSpec[]
   /** The column holding the record's name — used in titles and confirms. */
   nameKey: string
+  /**
+   * The row key holding the person's stored photograph, on a register of
+   * people. The record page draws it beside the name, and the register beside
+   * each name, or their initials where there is none. Always `PHOTO_KEY`,
+   * which search leaves alone.
+   */
+  photoKey?: 'photo'
   /** A per-row control, offered on every row of the list. */
   rowAction?: RowActionSpec
   /** Where a row leads, where it leads anywhere. See `RowLinkSpec`. */

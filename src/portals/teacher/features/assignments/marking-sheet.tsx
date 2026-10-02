@@ -215,7 +215,7 @@ function AnswerCard({
               {answer.question?.trim() || `Question ${answer.question_id}`}
             </p>
             <div className="mt-1.5 flex items-center gap-2">
-              <Tag>{theory ? 'Theory' : 'Multiple choice'}</Tag>
+              <Tag>{theory ? 'Written answer' : 'Multiple choice'}</Tag>
               <span className="text-2xs tabular-nums text-muted-foreground">
                 {points} point{points === 1 ? '' : 's'}
               </span>

@@ -45,8 +45,9 @@ test('a row is named by the assignment, so an unsat one still has an id', () => 
   assert.equal(row.id, '5')
   assert.equal(row.title, 'new assignment reading')
   assert.equal(row.subject, 'ENGLISH LANGUAGE')
-  assert.equal(row.limit, 'No limit')
-  assert.equal(assignmentRow({ ...ASSIGNMENT, time_limit: 45 }, OPEN_DAY).limit, '45 minutes')
+  // An assignment has no time allowed since 2026-10-02 — that is a quiz's.
+  assert.equal('limit' in row, false)
+  assert.equal('limit' in assignmentRow({ ...ASSIGNMENT, time_limit: 45 }, OPEN_DAY), false)
 })
 
 test('both stamps read on the school clock, whatever offset they carry', () => {
@@ -69,4 +70,8 @@ test('the register picks its own child out of the household', () => {
   )
   // A child whose class has nothing set is not an error.
   assert.deepEqual(childAssignments(household, 16, OPEN_DAY), [])
+})
+
+test('a child part-way through an assignment reads as started, not as a raw word', () => {
+  assert.equal(assignmentState({ ...ASSIGNMENT, status: 'in_progress' }, OPEN_DAY), 'Started')
 })

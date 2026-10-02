@@ -114,17 +114,14 @@ export function teacherNote(stats: TeacherDashboardStats): string {
 export function assignmentEntries(assignments: SetAssignment[], now: Date) {
   return assignments.map((assignment) => {
     const open = isOpen(assignment, now);
-    const questions = assignment.total_questions ?? 0;
 
     return {
       id: String(assignment.id),
       text: assignment.title?.trim() || `Assignment ${assignment.id}`,
-      who: [
-        assignment.subject?.name,
-        `${questions} question${questions === 1 ? '' : 's'}`,
-      ]
-        .filter(Boolean)
-        .join(' · '),
+      // The subject alone. The question count went with the rest of the
+      // quiz's fields on 2026-10-02; an assignment is written work, and its
+      // instructions are the task.
+      who: assignment.subject?.name?.trim() || BLANK,
       when: assignment.closedate
         ? `${open ? 'Closes' : 'Closed'} ${when(schoolTime(assignment.closedate), true)}`
         : 'No closing time',

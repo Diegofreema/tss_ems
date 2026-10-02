@@ -19,6 +19,7 @@ import {
   refTeachers,
   refTerms,
 } from '@/db/collections/reference'
+import { teachingQuizOptions } from '@/db/collections/quizzes'
 import { teacherArms, teacherSubjects } from '@/db/collections/teaching'
 import { SET } from '@/db/ids'
 import { queryClient } from '@/lib/query-client'
@@ -305,6 +306,37 @@ async function fetchOptions(key: OptionsKey, dependsOn: string): Promise<Option[
       value: String(arm.id),
       label: arm.department?.name ? `${arm.department.name} · ${arm.arm_name}` : arm.arm_name,
     }))
+  }
+
+  if (key === 'my-class-arms') {
+    /*
+     * The arms of the class chosen above, for a paper that names one. Empty
+     * until a class is chosen, and optional either way: the school reads no
+     * arm as every arm of the class, which is the ordinary case.
+     *
+     * Two sources, because neither is the whole answer. `arms_by_class` from
+     * `GET /quizzes/options` is the school's own list for the classes this
+     * teacher teaches — keyed by class, so another class's "B" is never
+     * offered — but a deployment without the quiz controller answers it 404.
+     * The arms on the teacher's own record are always there, and are the arms
+     * they are class teacher of. Each is read so that one refusing cannot
+     * take the other with it.
+     */
+    if (!dependsOn) return []
+    const [options, arms] = await Promise.all([
+      heldDocument(teachingQuizOptions).catch(() => undefined),
+      held(teacherArms).catch(() => []),
+    ])
+    const offered = new Map<string, string>(
+      Object.entries(options?.arms_by_class?.[dependsOn] ?? {}),
+    )
+    for (const arm of arms) {
+      const of = arm.department?.id ?? arm.department_id
+      if (String(of) === String(dependsOn) && !offered.has(String(arm.id))) {
+        offered.set(String(arm.id), arm.arm_name)
+      }
+    }
+    return distinct([...offered].map(([value, label]) => ({ value, label })))
   }
 
   if (key === 'sessions' || key === 'terms') {

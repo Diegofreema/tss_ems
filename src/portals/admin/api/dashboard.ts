@@ -18,6 +18,14 @@ import {
   schoolTiles,
 } from '../features/dashboard/dashboard'
 
+/**
+ * Which halves of the home page this account is shown, and so which of the
+ * scans are worth making: the invoice register and the spending summary are
+ * the Fees and Payments section's, the audit log the Admin section's. A scan made for a
+ * panel that will not be drawn is up to six requests the school refuses.
+ */
+export type DashboardScope = { money: boolean; activity: boolean }
+
 export type AdminDashboard = {
   money: DashboardFigure[]
   people: DashboardFigure[]
@@ -80,21 +88,19 @@ const scanLedger = () =>
  * invoices on file — a school with settled invoices reads `total_revenue: 0` —
  * so nothing here reads them.
  */
-async function fetchDashboard(): Promise<AdminDashboard> {
+async function fetchDashboard(scope: DashboardScope): Promise<AdminDashboard> {
   const [counters, ledger, spending, logs] = await Promise.all([
     usersService.dashboard(),
-    scanLedger(),
-    spendingsService.summary(),
-    logsService.list({ limit: FEED_SIZE }),
+    scope.money ? scanLedger() : { items: [], total: 0 },
+    scope.money ? spendingsService.summary() : [],
+    scope.activity ? logsService.list({ limit: FEED_SIZE }) : { items: [] },
   ])
 
   const today = new Date()
   const collections = collectionBars(ledger.items, today)
-  const money: DashboardFigure[] = financeFigures(
-    ledgerTotals(ledger.items, ledger.total),
-    spending,
-    today,
-  )
+  const money: DashboardFigure[] = scope.money
+    ? financeFigures(ledgerTotals(ledger.items, ledger.total), spending, today)
+    : []
   // The Collected card pulses with the same six months the chart below draws —
   // the one series this dashboard genuinely has, so the one sparkline it gets.
   const collected = money.find((figure) => figure.label === 'Collected')
@@ -110,10 +116,13 @@ async function fetchDashboard(): Promise<AdminDashboard> {
   }
 }
 
-export const adminDashboardQuery = queryOptions({
-  queryKey: ['admin', 'dashboard'],
-  queryFn: fetchDashboard,
+export const adminDashboardQuery = (scope: DashboardScope) =>
+  queryOptions({
+  // The scope is in the key, so an account granted Report this morning is not
+  // drawn the money-less page cached before it was.
+  queryKey: ['admin', 'dashboard', scope.money, scope.activity],
+  queryFn: () => fetchDashboard(scope),
   // `always`, so an offline device fails fast into the route's error boundary
   // instead of pausing the loader on a promise that never settles.
   networkMode: 'always',
-})
+  })

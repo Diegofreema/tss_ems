@@ -3,6 +3,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { Account } from '@/api/auth/types'
+import type { Privilege } from '@/api/users/types'
 import { everyStore, setToken, tokenStore } from '@/api/token'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { wipeLocalDb } from '@/db/wipe'
@@ -11,7 +12,17 @@ import { useNotificationsStore } from '@/features/notifications/notifications.st
 type SessionState = {
   /** Exactly what `/users/me` last answered, or null while signed out. */
   account: Account | null
+  /**
+   * What the office account was last granted, off
+   * `GET /admins/{id}/privileges`. Null until that has answered on this
+   * device, and for every account that is not an administrator. Kept here
+   * rather than in a query so a reload with no connection still knows which
+   * pages to offer — and so it goes wherever the identity goes, and nowhere
+   * else.
+   */
+  privileges: Privilege[] | null
   setAccount: (account: Account) => void
+  setPrivileges: (privileges: Privilege[]) => void
   clear: () => void
 }
 
@@ -77,8 +88,10 @@ export const useSessionStore = create<SessionState>()(
   persist(
     (set) => ({
       account: null,
+      privileges: null,
       setAccount: (account) => set({ account }),
-      clear: () => set({ account: null }),
+      setPrivileges: (privileges) => set({ privileges }),
+      clear: () => set({ account: null, privileges: null }),
     }),
     { name: NAME, storage: withTheToken },
   ),

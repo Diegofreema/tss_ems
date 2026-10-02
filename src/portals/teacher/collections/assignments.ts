@@ -64,13 +64,11 @@ function queuedAssignments(ops: readonly OutboxOp[]): Row[] {
         title: body.title?.trim() || 'Untitled assignment',
         subject: BLANK,
         klass: BLANK,
-        questions: '0',
+        arms: body.class_arm_id == null ? 'Every arm' : 'One arm',
         closes: BLANK,
         state: 'Waiting to send',
         details: body.details ?? '',
         term: BLANK,
-        minutes: body.time_limit ? `${body.time_limit} minutes` : 'No limit',
-        pass: body.passing_score == null ? BLANK : `${body.passing_score}%`,
         opens: BLANK,
         opens_at: '',
         closes_at: '',
@@ -88,13 +86,13 @@ export const assignments: CollectionDef = {
   kicker: 'Assessment',
   title: 'Set assignments',
   description:
-    'The assignments you have set, and what each one still needs. Students answer in their own portal once an assignment holds questions and its window opens, and what they send back comes here to be marked.',
+    'Written work you set and mark yourself. Students answer in their own portal while its window is open, and what they send back comes here to be marked. A paper that marks itself is a quiz — see Quizzes.',
   action: 'Set an assignment',
   searchHint: 'Search assignment, subject or class',
-  footer: 'What still needs questions first',
+  footer: 'Open first, then what is coming, then what is over',
   emptyTitle: 'No assignments set yet',
   emptyBody:
-    'Set an assignment for one of your classes, then write its questions. Only the class you set it for ever sees it.',
+    'Set an assignment for one of your classes. Only the class you set it for ever sees it — or just one of its arms, if you choose one.',
   noun: 'assignment',
   nameKey: 'title',
   counts: [
@@ -104,15 +102,15 @@ export const assignments: CollectionDef = {
     },
     { label: 'Open now', count: () => tally().then((counted) => counted.open) },
     {
-      label: 'Awaiting questions',
-      count: () => tally().then((counted) => counted.unwritten),
+      label: 'Handed in',
+      count: () => tally().then((counted) => counted.handedIn),
     },
   ],
   columns: [
     { key: 'title', label: 'Assignment', cardRole: 'title' },
     { key: 'subject', label: 'Subject', cardRole: 'subtitle' },
     { key: 'klass', label: 'Class' },
-    { key: 'questions', label: 'Questions', align: 'right' },
+    { key: 'arms', label: 'Arms' },
     // Both ends of the window, because the state alone cannot say which is
     // coming: "Not open yet" and "Open" are answers about different dates, and
     // a teacher checking whether a class can start needs the one that applies.
@@ -125,10 +123,8 @@ export const assignments: CollectionDef = {
     { key: 'details', label: 'Instructions', rich: true },
     { key: 'subject', label: 'Subject' },
     { key: 'klass', label: 'Class' },
+    { key: 'arms', label: 'Arms' },
     { key: 'term', label: 'Term' },
-    { key: 'questions', label: 'Questions' },
-    { key: 'minutes', label: 'Time allowed' },
-    { key: 'pass', label: 'Pass mark' },
     { key: 'opens', label: 'Opens' },
     { key: 'closes', label: 'Closes' },
     { key: 'state', label: 'State' },
@@ -167,7 +163,7 @@ export const assignments: CollectionDef = {
       ],
       source: questionRows,
       empty:
-        'This assignment holds no questions yet, so no student can sit it. Write them before its window opens.',
+        'No written questions on this assignment — the instructions are the task. Add questions if you want each answer marked on its own.',
     },
     {
       label: 'Submissions',
@@ -273,8 +269,8 @@ export const assignments: CollectionDef = {
       toast: { success: 'Assignment deleted' },
       label: 'An assignment',
     }),
-  removeBody: (row) =>
-    `The assignment and its ${row.questions} question${row.questions === '1' ? '' : 's'} go with it. An assignment students have already sat is better left to close than deleted.`,
+  removeBody: () =>
+    'The assignment and anything written on it go. One a student has already handed in cannot be deleted — close it instead.',
   form: [
     {
       title: 'The assignment',
@@ -318,7 +314,20 @@ export const assignments: CollectionDef = {
            * which `RemoteSelectField` does for every dependent feed.
            */
           dependsOn: 'subject_id',
-          hint: 'Who sits it — the class that takes the subject you chose. Every student of that class sees the assignment; no other class does.',
+          hint: 'Who sits it — the class that takes the subject you chose.',
+        },
+        {
+          key: 'class_arm_id',
+          label: 'Arm',
+          optionsFrom: 'my-class-arms',
+          dependsOn: 'department_id',
+          /*
+           * Optional, and empty is the ordinary case: the school reads null as
+           * every arm of the class. Narrowed to the chosen class, because arm
+           * names repeat across a school — there is an arm called simply "B" —
+           * and a paper naming another class's arm reaches no pupil at all.
+           */
+          hint: 'Leave empty for every arm of the class.',
         },
       ],
     },
@@ -355,26 +364,6 @@ export const assignments: CollectionDef = {
           // would take it.
           after: 'opens_at',
           hint: 'Nobody can start after this, and a sitting already running is cut short by it.',
-        },
-      ],
-    },
-    {
-      title: 'How it is sat',
-      fields: [
-        {
-          key: 'time_limit',
-          label: 'Time allowed (minutes)',
-          number: true,
-          min: 1,
-          hint: 'From the moment a student starts. Leave blank for no limit.',
-        },
-        {
-          key: 'passing_score',
-          label: 'Pass mark (%)',
-          number: true,
-          min: 0,
-          max: 100,
-          hint: 'A percentage of the marks going, so never more than 100.',
         },
       ],
     },

@@ -15,7 +15,7 @@ import {
   type StoredAttempt,
   writeAttempt,
 } from './attempt'
-import { limitSeconds, questionsOf, windowProblem } from './assignment'
+import { questionsOf, windowProblem } from './assignment'
 import { stateOf } from './assignments'
 
 /**
@@ -53,11 +53,10 @@ export function AssignmentPage({ assignmentId }: { assignmentId: string }) {
     const begun: StoredAttempt = {
       assignmentId,
       startedAt,
-      expiresAt: attemptExpiry(
-        startedAt,
-        limitSeconds(assignment),
-        schoolMillis(assignment.assignment?.closedate),
-      ),
+      // No time allowed on an assignment since 2026-10-02 — that belongs to a
+      // quiz — so no countdown runs; the school's window is the only bound,
+      // and it is the school that enforces it on the way in.
+      expiresAt: attemptExpiry(startedAt, null, schoolMillis(assignment.assignment?.closedate)),
       draft: {},
     }
     // Written before it is rendered, so a browser that dies between the two
@@ -111,7 +110,7 @@ export function AssignmentPage({ assignmentId }: { assignmentId: string }) {
       <AssignmentBrief
         assignment={assignment}
         state={state}
-        note="Read the terms above before you begin. The assignment can be taken once: when you submit it, that is the attempt the school marks. The clock starts when you press the button and keeps running if you leave the page, so start it when you are ready to sit it."
+        note="Read the instructions above before you begin. The assignment can be handed in once: what you submit is what your teacher marks. Your answers are kept on this device as you write, so you can leave and come back before it closes."
         action={<Button onClick={start}>Start the assignment</Button>}
       />
     )

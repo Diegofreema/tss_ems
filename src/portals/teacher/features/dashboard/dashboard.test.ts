@@ -106,7 +106,7 @@ test('an assignment with no closing time is left open rather than shut', () => {
 test('each assignment carries its subject, its size and when it shuts', () => {
   const [maths] = assignmentEntries(DASHBOARD.recent_assignments, AFTER)
   assert.equal(maths.text, 'Simple additions')
-  assert.equal(maths.who, 'MATHEMATICS · 4 questions')
+  assert.equal(maths.who, 'MATHEMATICS')
   assert.match(maths.when, /^Closed 28 Aug 2026/)
   assert.equal(maths.flagged, false)
 

@@ -807,6 +807,47 @@ a key guessed from an unseen shape is how a register quietly holds two copies of
   `scope` as well — `path` is part of the key its rows cache under, and it now shares one.
   The subject's record stopped being a modal in the same change: a modal draws no sub-tables, by
   design, because a register thin enough for one has no real tabs to show.
+- **An assignment is written work; a quiz is a paper that marks itself — two records since
+  2026-10-02.** They used to be one `setassignments` row told apart by `test_type`, and the
+  school split them: `test_type`, `time_limit`, `passing_score` and `total_questions` are gone
+  from `/setassignments` (sent, they are ignored) and live on `/quizzes` as `duration`,
+  `pass_mark`, `total_questions` and the publish step. So the assignment form asks for an
+  optional arm and the window, nothing else; the assignment register has no "No questions" state,
+  because nothing counts the questions any more; a new question on an assignment is a written
+  answer (`kindsFor` — an old multiple-choice one is still edited as one); and the student's
+  assignment runs no clock. Quizzes are their own register on both portals:
+  `teachingQuizzes`/`teachingQuizRecords`/`teachingQuizSittings`/`teachingQuizOptions` on the
+  teacher's device with every write queued (publish included — the school still refuses a quiz
+  with no questions or an unanswered one, and the queue raises that on the page), and
+  `schoolingQuizzes` for the pupil's list. **Sitting a quiz is the one online-only page in the
+  student portal** — the clock, the per-answer save and the marking are the school's — and its
+  readers (`api/quizzes/pupil.ts`) are written from a document that shows none of those answers,
+  so they take several spellings and are the first thing to correct against a live one. Two
+  more things in the same state: the sittings list (`features/quizzes/sittings.ts`) and which of
+  a true/false question's two options is "True". Neither deployment had the quiz controller when
+  this went in — every `/quizzes` path answered "No API endpoint matches" — and the assignment
+  question-bank endpoints the editor still writes through are marked *retired* in the school's
+  document with no replacement named. The arm box on both forms is `my-class-arms`:
+  `arms_by_class` off `GET /quizzes/options`, with the teacher's own arms beside it so it still
+  offers something while that endpoint is missing.
+- **The office's portal is cut down to the signed-in administrator's privileges.**
+  `GET /admins/{id}/privileges` is read when the portal opens (awaited only on a device that has
+  never been told, then refreshed at most every 30s) and kept beside the identity in the session
+  store, so a reload with no connection still knows what to offer. `features/auth/privileges.ts`
+  (pure, tested) is the one map: a privilege's *name* picks its section — "HRM" and "Library" are
+  the same grant — with the id as fallback, and `PAGE_SECTIONS` places every page by the first
+  segment under `/admin`, which covers a register's record, edit, create and flow routes in one
+  line. A test fails if a route file or a collection is added without a line there. The shell asks
+  `config.useMayOpen` for the rail, the header's search and messages buttons, the Settings row and
+  the outlet itself — a closed address draws `DeniedState` naming the privilege it needs. A Super
+  Admin opens everything. **The map is the school's decision, not the server's**: neither the API
+  nor its document says which privilege guards which endpoint, the live catalogue holds eighteen
+  where the document shows eleven, and the server refuses what it refuses whatever the portal
+  draws. **A closed page never loads**: the shell's `beforeLoad` runs before every child loader
+  and redirects a closed address to `/admin/closed?from=…` (replacing the history entry), so the
+  register is never asked for nor written onto the device. That page moves on to `from` by itself
+  if the privilege arrives while it is open. The outlet check stays as the second line, for a
+  privilege taken away while a page is already up.
 - **A row's action lives in the menu at the end of the row, not as a button on it.** `RowMenu`:
   the way into the record first — "Open the {noun}" — then whatever this row can be made to do. The
   button it replaced was a word that changed per row (Suspend beside Reinstate beside nothing at

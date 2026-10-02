@@ -1,3 +1,5 @@
+import { myQuizzesOf, type PupilQuiz } from '@/api/quizzes/pupil'
+import { quizzesService } from '@/api/quizzes/service'
 import { assignmentsService } from '@/api/assignments/service'
 import type { Assignment } from '@/api/assignments/types'
 import { registerService } from '@/api/attendance/service'
@@ -136,6 +138,19 @@ export const schoolingAssignments = schoolCollection<Assignment, number>({
   schemaVersion: 1,
 })
 
+/**
+ * The quizzes this pupil can sit, and the closed ones they sat — so the list
+ * of what is set, and the marks already had, open with no connection.
+ * Sitting one is another matter: the clock and the marking are the school's,
+ * so the paper itself is never cached (see `quiz-sitting.tsx`).
+ */
+export const schoolingQuizzes = schoolCollection<PupilQuiz, number>({
+  id: SET.schoolingQuizzes,
+  fetch: () => quizzesService.mine().then(myQuizzesOf),
+  getKey: (quiz) => quiz.id,
+  schemaVersion: 1,
+})
+
 /** Everything the student's portal keeps on the device. */
 export const schoolingCollections = [
   schoolingRecord,
@@ -149,5 +164,6 @@ export const schoolingCollections = [
   schoolingMaterials,
   schoolingLoans,
   schoolingAssignments,
+  schoolingQuizzes,
   myNotices,
 ]

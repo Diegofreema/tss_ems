@@ -12,26 +12,24 @@ import {
  * The teacher's own register of assignments, off `GET /setassignments`.
  *
  * Unlike the student's list, nothing here has been worked out by the server:
- * there is no `window_problem` on a set assignment, because the question the server
- * answers for a student — may I sit this? — is not the question a teacher is
- * asking. What a teacher wants to know is whether the assignment is finished, and
- * the only thing that says so is whether it holds any questions at all.
+ * there is no `window_problem` on a set assignment, because the question the
+ * server answers for a student — may I sit this? — is not the question a
+ * teacher is asking. What a teacher wants to know is where the paper is in its
+ * window, and how many have handed it in.
+ *
+ * There is no "No questions" state any more. It was read off
+ * `total_questions`, which went with the rest of the quiz's fields on
+ * 2026-10-02: an assignment is written work whose instructions are the task,
+ * and the objective paper that needed its questions counted is a quiz now.
  */
 
-export type AssignmentState =
-  | 'No questions'
-  | 'Open'
-  | 'Not open yet'
-  | 'Closed'
-  | 'Inactive'
+export type AssignmentState = 'Open' | 'Not open yet' | 'Closed' | 'Inactive'
 
 /**
  * Which state an assignment is in, from the teacher's side.
  *
- * Order matters. An assignment the school has taken out of use is inactive whatever
- * its dates say; one whose window has been and gone is over whether or not it
- * was ever written; and of the assignments still to come, the empty ones are the
- * outstanding job, so they say so rather than saying "open".
+ * Order matters. An assignment the school has taken out of use is inactive
+ * whatever its dates say, and one whose window has been and gone is over.
  */
 export function stateOf(assignment: Assignment, now = Date.now()): AssignmentState {
   const status = assignment.status?.trim().toLowerCase()
@@ -40,19 +38,26 @@ export function stateOf(assignment: Assignment, now = Date.now()): AssignmentSta
   const closes = schoolMillis(assignment.closedate)
   if (closes !== null && closes <= now) return 'Closed'
 
-  if (!assignment.total_questions) return 'No questions'
-
   const opens = schoolMillis(assignment.opendate)
   return opens !== null && opens > now ? 'Not open yet' : 'Open'
 }
 
-/** Unwritten assignments first — they are the work — then what is live, then what is over. */
+/** What is live first — it is what pupils are handing in — then what is coming, then what is over. */
 const ORDER: Record<AssignmentState, number> = {
-  'No questions': 0,
-  Open: 1,
-  'Not open yet': 2,
-  Closed: 3,
-  Inactive: 4,
+  Open: 0,
+  'Not open yet': 1,
+  Closed: 2,
+  Inactive: 3,
+}
+
+/**
+ * Who the paper is for. The school says `for_every_arm` beside the id; the
+ * arm's name is not sent, and an arm is chosen from the teacher's own form, so
+ * the register says which kind rather than inventing a name.
+ */
+function arms(assignment: Assignment): string {
+  if (assignment.for_every_arm ?? assignment.class_arm_id == null) return 'Every arm'
+  return 'One arm'
 }
 
 function text(value: string | null | undefined): string {
@@ -89,15 +94,13 @@ export function assignmentRows(assignments: Assignment[], now = Date.now()): Row
       title: assignment.title?.trim() || `Assignment ${assignment.id}`,
       subject: text(assignment.subject),
       klass: text(assignment.class),
-      questions: String(assignment.total_questions ?? 0),
+      arms: arms(assignment),
       closes: when(schoolTime(assignment.closedate), true),
       state,
 
       // Read by the record panel rather than the table.
       details: text(assignment.details),
       term: text(assignment.semester),
-      minutes: assignment.time_limit ? `${assignment.time_limit} minutes` : 'No limit',
-      pass: assignment.passing_score == null ? BLANK : `${assignment.passing_score}%`,
       opens: when(schoolTime(assignment.opendate), true),
 
       // The window as the school wrote it, beside the two display strings
@@ -119,8 +122,7 @@ export function assignmentRows(assignments: Assignment[], now = Date.now()): Row
       status: assignment.status ?? '',
       subject_id: assignment.subject_id == null ? '' : String(assignment.subject_id),
       department_id: assignment.department_id == null ? '' : String(assignment.department_id),
-      time_limit: assignment.time_limit == null ? '' : String(assignment.time_limit),
-      passing_score: assignment.passing_score == null ? '' : String(assignment.passing_score),
+      class_arm_id: assignment.class_arm_id == null ? '' : String(assignment.class_arm_id),
     }))
 }
 
@@ -130,6 +132,6 @@ export function assignmentTally(rows: Row[]) {
   return {
     assignments: rows.length,
     open: count('Open'),
-    unwritten: count('No questions'),
+    handedIn: rows.reduce((sum, row) => sum + (Number(row.sat_by) || 0), 0),
   }
 }

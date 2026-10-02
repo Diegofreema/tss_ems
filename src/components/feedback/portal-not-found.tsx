@@ -15,6 +15,16 @@ import { NotFoundState } from './not-found-state'
  * keeps its own for that one: there the shell renders and the not-found is
  * already the outlet's content.
  */
-export const portalNotFound = (config: PortalConfig) => () => (
-  <NotFoundState links={config.notFoundLinks} audience={config.notFoundAudience} />
-)
+export const portalNotFound = (config: PortalConfig) =>
+  function PortalNotFound() {
+    // The way on is offered only where it goes somewhere this account may
+    // open: a 404 that suggests a page answering "you cannot open this" is
+    // two dead ends in a row.
+    const mayOpen = config.useMayOpen?.() ?? (() => true)
+    return (
+      <NotFoundState
+        links={config.notFoundLinks.filter((link) => mayOpen(link.to))}
+        audience={config.notFoundAudience}
+      />
+    )
+  }

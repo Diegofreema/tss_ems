@@ -269,7 +269,12 @@ export function CollectionList({
             )}
           >
             <DataTable
-              columns={toTableColumns(filledColumns(definition.columns, paged.rows))}
+              columns={toTableColumns(
+                filledColumns(definition.columns, paged.rows),
+                definition.photoKey
+                  ? { nameKey: definition.nameKey, photoKey: definition.photoKey }
+                  : undefined,
+              )}
               rows={paged.rows}
               rowKey={(row) => row.id}
               onRowClick={(row) =>

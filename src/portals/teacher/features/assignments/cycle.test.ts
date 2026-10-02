@@ -29,19 +29,16 @@ const FILLED = {
   details: '<p>Answer all questions. <strong>Show your working.</strong></p>',
   subject_id: '2',
   department_id: '6',
-  time_limit: '25',
-  passing_score: '40',
+  class_arm_id: '',
 }
 
 test('setting one sends the body the school documents, and nothing else', () => {
   assert.deepEqual(assignmentBody(FILLED), {
     subject_id: 2,
     department_id: 6,
+    class_arm_id: null,
     title: 'Week 5 class test',
     details: '<p>Answer all questions. <strong>Show your working.</strong></p>',
-    test_type: 'cbt_test',
-    time_limit: 25,
-    passing_score: 40,
     // The window is the teacher's now. Unset on this one, which the school
     // reads as "open once it has questions, and never shuts".
     opendate: null,
@@ -58,7 +55,6 @@ const JUST_SET: Assignment = {
   id: 36,
   title: 'Week 5 class test',
   details: '<p>Answer all questions. <strong>Show your working.</strong></p>',
-  test_type: 'cbt_test',
   subject_id: 2,
   subject: 'MATHEMATICS',
   department_id: 6,
@@ -69,21 +65,17 @@ const JUST_SET: Assignment = {
   status: 'active',
   opendate: null,
   closedate: '2026-09-09 14:57:53',
-  time_limit: 25,
-  passing_score: 40,
-  total_questions: 0,
+  submission_count: 0,
 }
 
 const NOW = new Date('2026-09-02T09:00:00').getTime()
 
-test('a newly set assignment reads as one still waiting on its questions', () => {
+test('a newly set assignment is open — its instructions are the task', () => {
   const [row] = assignmentRows([JUST_SET], NOW)
-  assert.equal(row.state, 'No questions')
+  assert.equal(row.state, 'Open')
   // What was typed into the form is what the teacher is shown back.
   assert.equal(row.title, 'Week 5 class test')
-  assert.equal(row.minutes, '25 minutes')
-  assert.equal(row.pass, '40%')
-  assert.equal(row.questions, '0')
+  assert.equal(row.arms, 'Every arm')
   // The names the school put to the two ids that were submitted.
   assert.equal(row.subject, 'MATHEMATICS')
   assert.equal(row.klass, 'SSS I')
@@ -99,11 +91,9 @@ test('correcting one edits the row it was read from, and keeps its status', () =
   assert.deepEqual(assignmentBody(edited, row.status), {
     subject_id: 2,
     department_id: 6,
+    class_arm_id: null,
     title: 'Week 5 class test (moved to Friday)',
     details: '<p>Answer all questions. <strong>Show your working.</strong></p>',
-    test_type: 'cbt_test',
-    time_limit: 25,
-    passing_score: 40,
     // Read back off the row and sent again unchanged — the edit form opens on
     // the stamps the school wrote, so a correction that does not touch the
     // window leaves the window where it was.
@@ -118,6 +108,7 @@ test('correcting one edits the row it was read from, and keeps its status', () =
 test('writing the first question sends what the school asks for', () => {
   const body = questionBody({
     ...blankQuestion(),
+    question_type: 'multiple_choice',
     question_text: 'What is 2 + 2?',
     points: '5',
     options: [{ option_text: '3' }, { option_text: '4' }, { option_text: '5' }],
@@ -137,11 +128,9 @@ test('writing the first question sends what the school asks for', () => {
   })
 })
 
-test('an assignment that holds a question is one a student can sit', () => {
-  // The school counts the questions itself, so the state moves without this
-  // portal being told anything else.
-  assert.equal(stateOf(JUST_SET, NOW), 'No questions')
-  assert.equal(stateOf({ ...JUST_SET, total_questions: 1 }, NOW), 'Open')
+test('the state is the window alone — the school no longer counts questions on the paper', () => {
+  assert.equal(stateOf(JUST_SET, NOW), 'Open')
+  assert.equal(stateOf({ ...JUST_SET, closedate: '2026-09-01 14:57:53' }, NOW), 'Closed')
 })
 
 /** The question as `GET /setassignments/{id}/questions` sends it back. */

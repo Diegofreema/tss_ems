@@ -4,6 +4,7 @@ import type {
   FamilyInvoice,
 } from '../../api/parents/types.ts'
 import { BLANK } from '../../features/collections/blank.ts'
+import { studentPhoto } from '../../lib/photo-url.ts'
 import { SETTLED } from '../../features/collections/invoice.ts'
 import type { Row } from '../../features/collections/types.ts'
 import { schoolTime, when } from '../../features/collections/when.ts'
@@ -55,6 +56,8 @@ export type Child = {
   /** First name, as the school entered it — used in copy. */
   name: string
   full: string
+  /** The photo as a row keeps it (`studentPhoto`), or empty. */
+  photo?: string
   arm: string
   /** The registration number, or a stand-in where none has been issued. */
   adm: string
@@ -190,6 +193,7 @@ export function familyChild(
     id: enrolled.id,
     name: childName(enrolled),
     full,
+    photo: studentPhoto(enrolled.passporturl),
     arm: text(enrolled.class_arm ?? enrolled.department),
     // The school does not always issue one, and this is on screen beside the
     // name, so it says which student it is rather than nothing at all.

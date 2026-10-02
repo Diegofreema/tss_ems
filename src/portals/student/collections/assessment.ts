@@ -1,9 +1,10 @@
 import { heldDocument, heldRows } from '@/db/collection';
-import { schoolingAssignments, schoolingResults } from '@/db/collections/schooling';
+import { schoolingAssignments, schoolingQuizzes, schoolingResults } from '@/db/collections/schooling';
 import { pageRows } from '@/features/collections/api';
 import { localFirst } from '@/features/collections/local-first';
 import type { CollectionDef } from '@/features/collections/types';
 import { assignmentRows, assignmentTally } from '../features/assignments/assignments';
+import { quizRows, quizTally } from '../features/quizzes/quizzes';
 import { marksOf, resultRows, termAverage } from '../features/results/results';
 
 /**
@@ -22,7 +23,7 @@ export const assignments: CollectionDef = {
   kicker: 'Assessment',
   title: 'Assignments',
   description:
-    'Assignments set for your arm, the open ones first. Each one can be answered once — open an assignment to see its questions.',
+    'Written work set for your arm, the open ones first. Each one can be handed in once, and your teacher marks it. Quizzes that mark themselves are under Quizzes.',
   // No button, and no `actionTo`: which assignment "Start the open assignment" would
   // open depends on which of them is open, and a fixed link cannot know. The
   // rows are the way in.
@@ -53,7 +54,6 @@ export const assignments: CollectionDef = {
     { key: 'title', label: 'Assignment', cardRole: 'title' },
     { key: 'subject', label: 'Subject', cardRole: 'subtitle' },
     { key: 'questions', label: 'Questions', align: 'right' },
-    { key: 'minutes', label: 'Minutes', align: 'right' },
     // Both ends, because "Not open yet" is the one state whose date is the
     // opening one — a student reading only "Closes" against an assignment
     // they cannot start yet is being shown the wrong half of the window.
@@ -77,6 +77,51 @@ export const assignments: CollectionDef = {
   source: (params) => mine().then((all) => pageRows(all, params)),
   // No `record`: a row opens the assignment at `/student/assignments/{id}`, which reads
   // the questions the list never asked for.
+};
+
+const myQuizzes = async () => quizRows(await heldRows(schoolingQuizzes));
+const quizCounts = () => myQuizzes().then(quizTally);
+
+/**
+ * Quizzes — objective papers that mark themselves the moment they are handed
+ * in. Split off assignments on 2026-10-02. The list is kept on the device;
+ * sitting one is not, because the clock and the marking are the school's.
+ */
+export const quizzes: CollectionDef = {
+  id: 'quizzes',
+  path: '/student/quizzes',
+  kicker: 'Assessment',
+  title: 'Quizzes',
+  description:
+    'Quizzes open to your class, and the ones you have sat. Each is marked the moment you hand it in, and you see your mark straight away.',
+  action: 'Sit the open quiz',
+  readonly: true,
+  searchHint: 'Search quiz or subject',
+  footer: 'What you can sit now first',
+  emptyTitle: 'No quizzes open',
+  emptyBody:
+    'A quiz appears here when a teacher opens one to your class, and stays once you have sat it so you can read your mark.',
+  noun: 'quiz',
+  nameKey: 'name',
+  tabs: [],
+  counts: [
+    { label: 'Open now', count: () => quizCounts().then((counted) => counted.open) },
+    { label: 'Sat', count: () => quizCounts().then((counted) => counted.sat) },
+  ],
+  columns: [
+    { key: 'name', label: 'Quiz', cardRole: 'title' },
+    { key: 'subject', label: 'Subject', cardRole: 'subtitle' },
+    { key: 'marks', label: 'Marks', align: 'right' },
+    { key: 'clock', label: 'Clock' },
+    { key: 'closes', label: 'Closes' },
+    { key: 'state', label: 'State', tag: true, cardRole: 'tag' },
+  ],
+  collection: localFirst({
+    entities: schoolingQuizzes,
+    rows: (all) => quizRows(all),
+  }),
+  source: (params) => myQuizzes().then((all) => pageRows(all, params)),
+  // No `record`: a row opens the quiz at `/student/quizzes/{id}`.
 };
 
 const sheet = () => heldDocument(schoolingResults);

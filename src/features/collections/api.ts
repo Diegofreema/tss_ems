@@ -1,5 +1,6 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import { PAGE_SIZE } from '@/hooks/use-list-query'
+import { PHOTO_KEY } from './photo-key'
 import { plainText } from './rich-text'
 import type { CollectionDef, ListParams, ListResult, Row } from './types'
 
@@ -13,7 +14,8 @@ const LATENCY_MS = 420
  */
 function matches(row: Row, needle: string) {
   return Object.entries(row).some(
-    ([key, value]) => key !== 'id' && plainText(value).toLowerCase().includes(needle),
+    ([key, value]) =>
+      key !== 'id' && key !== PHOTO_KEY && plainText(value).toLowerCase().includes(needle),
   )
 }
 

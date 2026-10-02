@@ -6,8 +6,7 @@ import type { PageParams } from '../types.ts'
  * The student's own list of the same assignments is `Assignment` in `../assignments`,
  * and the two are not the same record read twice: this one carries the class,
  * the term and the teacher who set it, and nothing about whether anybody has
- * sat it. Where they share a field name they mean the same thing, with one
- * exception — see `total_questions`.
+ * sat it. Where they share a field name they mean the same thing.
  *
  * `subject`, `class` and `semester` are names beside their ids rather than
  * nested records, so they are read as the strings they are.
@@ -16,13 +15,15 @@ export type Assignment = {
   id: number
   title?: string | null
   details?: string | null
-  /** `cbt_test` on every assignment set so far; the school's own word for the kind. */
-  test_type?: string | null
   subject_id?: number | null
   subject?: string | null
   /** The class the assignment is set for. The API's word for a class is department. */
   department_id?: number | null
   class?: string | null
+  /** One arm of the class, or null for every arm — the ordinary case, not a gap. */
+  class_arm_id?: number | null
+  /** The school's own reading of the line above. */
+  for_every_arm?: boolean | null
   semester_id?: number | null
   semester?: string | null
   teacher_id?: number | null
@@ -35,9 +36,6 @@ export type Assignment = {
    * `2026-08-28T10:08`. Both are the school's own clock; see `schoolTime`.
    */
   closedate?: string | null
-  /** Minutes allowed once a student starts. Null means the window is the limit. */
-  time_limit?: number | null
-  passing_score?: number | null
   /** How many students have handed this paper in. 0 on one nobody has sat. */
   submission_count?: number | null
   /**
@@ -70,12 +68,6 @@ export type Assignment = {
    * the form with it.
    */
   editable_when_locked?: string[] | null
-  /**
-   * How many questions the assignment actually holds — 0 on an assignment just created,
-   * 1 once one question is written. Not the student's `total_questions`, which
-   * is what the assignment claims to hold and can disagree with what it does.
-   */
-  total_questions?: number | null
 }
 
 /** Unverified: the endpoint pages, so it is assumed to take the page. */
@@ -96,15 +88,19 @@ export type AssignmentListParams = PageParams & {
  * sends back (`2026-09-23 08:12:16`) — see `toSchoolStamp`. Null is the
  * school's own "no bound": an assignment with no `opendate` is open from the
  * moment it holds questions, and one with no `closedate` does not shut.
+ *
+ * **No `test_type`, `time_limit`, `passing_score` or `total_questions`** —
+ * dropped from `setassignments` on 2026-10-02. They belonged to a quiz, which
+ * is its own record now (`../quizzes`); an assignment is written work a
+ * teacher reads, and the school ignores them if they are sent.
  */
 export type AssignmentBody = {
   subject_id: number
   department_id: number
+  /** One arm, or null for every arm of the class. An arm of another class is a 422. */
+  class_arm_id?: number | null
   title: string
   details?: string
-  test_type: string
-  time_limit?: number | null
-  passing_score?: number | null
   /** When students may start it. Null is open as soon as it has questions. */
   opendate?: string | null
   /** When it shuts. Null never shuts. */

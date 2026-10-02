@@ -10,13 +10,27 @@ import type {
  * A question is one of two things and the difference runs through everything:
  * a multiple-choice question carries its own answer key and the school marks
  * it, and a theory question carries none and the teacher marks it by hand.
- * Nothing here lets an assignment hold a third kind — those are the two the API's
- * own questions come back as.
+ *
+ * **A new question on an assignment is written work.** On 2026-10-02 the
+ * objective paper became a quiz of its own (`api/quizzes`) and an assignment
+ * became the thing a teacher reads and marks, so the form offers a written
+ * answer alone — see `kindsFor`. A multiple-choice question already on an old
+ * paper is still read, marked and edited as one: the pupils who answered it
+ * are owed the mark their answer earned.
  */
 
 export const TYPE_LABEL: Record<QuestionType, string> = {
   multiple_choice: 'Multiple choice',
-  theory: 'Theory',
+  theory: 'Written answer',
+}
+
+/**
+ * The kinds the form offers for this question. Written work alone, unless
+ * the question being edited is already multiple choice — taking that away
+ * would turn its answer key into nothing the next time it was saved.
+ */
+export function kindsFor(current: QuestionType): QuestionType[] {
+  return current === 'multiple_choice' ? ['theory', 'multiple_choice'] : ['theory']
 }
 
 export function typeLabel(type: string | null | undefined): string {
@@ -71,7 +85,8 @@ export const MAX_OPTIONS = 6
 
 export const blankQuestion = (): QuestionValues => ({
   question_text: '',
-  question_type: 'multiple_choice',
+  // Written work, which is what an assignment is — see the module note.
+  question_type: 'theory',
   points: '1',
   options: [{ option_text: '' }, { option_text: '' }],
   // Nothing marked. Starting on the first choice is a preselected answer key:

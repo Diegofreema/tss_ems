@@ -3,19 +3,20 @@ import type { TagTone } from '../components/common/tag-tone.ts'
 // 'Not current' is settled, not good news: four sessions out of five are not
 // the current one, and painting every last one of them green would read as
 // four endorsements. It stays quiet.
-const GOOD = ['Active', 'Paid', 'Cleared', 'Approved', 'Marked', 'Current', 'Present', 'Excused', 'Enabled', 'Available', 'Completed', 'Admitted', 'In this arm', 'Submitted', 'Correct', 'Returned']
+const GOOD = ['Active', 'Paid', 'Cleared', 'Approved', 'Marked', 'Current', 'Present', 'Excused', 'Enabled', 'Available', 'Completed', 'Admitted', 'In this arm', 'Submitted', 'Correct', 'Returned', 'Passed', 'Sat']
 // Live now, and the reason it is not green: an open assignment is not good
 // news, it is **the one somebody has to do something about**. Green would put
 // it beside 'Submitted' on the student's own list — an assignment still to sit
 // painted exactly like one already handed in, which is the opposite reading.
-const ACCENT = ['Open']
+// 'Carry on' is a quiz a pupil has opened and not handed in — live, and theirs.
+const ACCENT = ['Open', 'Carry on']
 // Settled: over, withdrawn, or never current. Nothing to do and nothing wrong.
 // 'Unavailable' is settled either way it arises: a title the office retired,
 // or one down to the reference copy the library keeps back. Nothing is wrong
 // and nothing is owed — it simply does not go out. Red is for 'All out',
 // which is the one that says the shelf is empty.
 const QUIET = ['Not current', 'Closed', 'Inactive', 'Unavailable']
-const BAD = ['Overdue', 'Unpaid', 'Suspended', 'Not marked', 'All out', 'Rejected', 'Sent back', 'Declined', 'Owing', 'Not placed', 'Absent', 'Disabled', 'Deactivated', 'Missed', 'Wrong', 'No questions']
+const BAD = ['Overdue', 'Unpaid', 'Suspended', 'Not marked', 'All out', 'Rejected', 'Sent back', 'Declined', 'Owing', 'Not placed', 'Absent', 'Disabled', 'Deactivated', 'Missed', 'Wrong', 'No questions', 'Failed']
 
 /**
  * The design colours a status by what it means, not by which table it is in:

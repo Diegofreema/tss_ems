@@ -26,6 +26,8 @@ function at(stamp: string | null): number | null {
 export function assignmentState(assignment: ChildAssignment, now: Date): string {
   const status = assignment.status?.trim().toLowerCase()
   if (!status) return BLANK
+  // The school's own word, written as a family would say it.
+  if (status === 'in_progress') return 'Started'
   if (status !== OPEN) return status[0].toUpperCase() + status.slice(1)
 
   const closes = at(assignment.closedate)
@@ -43,7 +45,6 @@ export function assignmentRow(assignment: ChildAssignment, now: Date): Row {
 
     // Read by the record panel rather than the table.
     opens: when(schoolTime(assignment.opendate), true),
-    limit: assignment.time_limit ? `${assignment.time_limit} minutes` : 'No limit',
   }
 }
 

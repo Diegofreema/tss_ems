@@ -46,6 +46,12 @@ export type OptionsKey =
   | 'my-arms'
   /** The classes the signed-in teacher reaches — `/departments` is the office's. */
   | 'my-classes'
+  /**
+   * The arms of one class (`dependsOn`), as a teacher may name them on a quiz
+   * or an assignment — off `GET /quizzes/options`'s `arms_by_class`, and the
+   * arms on the teacher's own record beside it.
+   */
+  | 'my-class-arms'
   /** The four ways the school takes money at the counter. */
   | 'payment-methods'
   /** Super Admin, Bursar, Secretary — what kind of login an account is. */

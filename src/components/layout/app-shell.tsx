@@ -1,18 +1,26 @@
 import { Outlet, useLocation } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { DeniedState } from '@/components/feedback/denied-state'
 import { DefaultPasswordGate } from '@/features/auth/components/default-password-gate'
+import { visibleNav } from '@/features/auth/privileges'
 import { useAccountSummary } from '@/features/auth/session'
 import { MessagesButton } from '@/features/messages/components/messages-button'
 import { NotificationBell } from '@/features/notifications/components/notification-bell'
 import { useBreakpoint } from '@/hooks/use-breakpoint'
-import type { PortalConfig } from '@/lib/portal'
+import { navLabel, type PortalConfig } from '@/lib/portal'
 import { useShellStore } from '@/stores/shell.store'
 import { AppHeader } from './header/app-header'
 import { OfflineBanner } from './offline-banner'
 import { Sidebar } from './sidebar/sidebar'
 import { SyncChip } from './sync-chip'
 
-export function AppShell({ config }: { config: PortalConfig }) {
+/** A portal with no sections to grant opens all of itself. */
+const OPEN_DOOR = (_path: string) => true
+const useEverything = () => OPEN_DOOR
+
+export function AppShell({ config: portal }: { config: PortalConfig }) {
+  const config = usePortalFor(portal)
+  const mayOpen = (portal.useMayOpen ?? useEverything)()
   const notifications = config.useNotifications()
   const narrow = useBreakpoint('narrow')
   const drawerOpen = useShellStore((state) => state.drawerOpen)
@@ -59,7 +67,9 @@ export function AppShell({ config }: { config: PortalConfig }) {
           narrow={narrow}
         >
           <SyncChip />
-          {config.messagesPath && <MessagesButton to={config.messagesPath} />}
+          {config.messagesPath && mayOpen(config.messagesPath) && (
+            <MessagesButton to={config.messagesPath} />
+          )}
           <NotificationBell
             notifications={notifications}
             allPath={`${config.basePath}/notifications`}
@@ -73,9 +83,41 @@ export function AppShell({ config }: { config: PortalConfig }) {
           key={pathname}
           className="@container/page mx-auto w-full max-w-[1280px] flex-1 animate-ems-in p-content"
         >
-          <Outlet />
+          {mayOpen(pathname) ? (
+            <Outlet />
+          ) : (
+            <DeniedState
+              pageName={navLabel(portal, pathname)}
+              body={config.closedBecause?.(pathname)}
+              ask="An administrator who manages privileges"
+              dashboardPath={config.basePath}
+            />
+          )}
         </div>
       </main>
     </div>
   )
+}
+
+/**
+ * The portal as this account may see it: the rail cut down to the pages it
+ * may open, and Settings pointed at the person's own record where the school's
+ * settings are closed to them — the rail's Tools row is on every page, and a
+ * door on every page that opens onto "you cannot open this" is worse than one
+ * that opens onto something of theirs.
+ *
+ * Here rather than in the sidebar, so the header, the rail and the outlet all
+ * ask the one question and cannot disagree about the answer.
+ */
+function usePortalFor(portal: PortalConfig): PortalConfig {
+  const mayOpen = (portal.useMayOpen ?? useEverything)()
+  return useMemo(() => {
+    const settings = portal.settingsPath ?? `${portal.basePath}/profile`
+    return {
+      ...portal,
+      nav: visibleNav(portal.nav, mayOpen),
+      searchPath: portal.searchPath && mayOpen(portal.searchPath) ? portal.searchPath : undefined,
+      settingsPath: mayOpen(settings) ? settings : `${portal.basePath}/profile`,
+    }
+  }, [portal, mayOpen])
 }

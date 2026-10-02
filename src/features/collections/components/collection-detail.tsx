@@ -5,6 +5,7 @@ import { Pencil } from 'lucide-react'
 // `toast` goes back in with the buttons commented out below.
 import { BackLink } from '@/components/page/back-link'
 import { ExternalLink } from '@/components/common/external-link'
+import { PersonAvatar } from '@/components/common/person-avatar'
 import { MissingState } from '@/components/feedback/missing-state'
 import { ConfirmDialog } from '@/components/feedback/confirm-dialog'
 import { SectionHeading } from '@/components/common/section-heading'
@@ -248,20 +249,31 @@ export function CollectionDetail({
           inModal && 'pr-9',
         )}
       >
-        <div className="max-w-[60ch]">
-          <div className="text-2xs uppercase tracking-kicker text-brand-700">
-            {definition.kicker} · {definition.title}
-          </div>
-          <h2 className="mt-2 text-detail-title">{record[definition.nameKey]}</h2>
-          {tagColumns.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {tagColumns.map((column) => (
-                <Tag key={column.key} variant={toneForStatus(record[column.key])}>
-                  {record[column.key]}
-                </Tag>
-              ))}
-            </div>
+        {/* A register of people puts the face beside the name — the photo the
+            school holds, or the initials until there is one. */}
+        <div className="flex max-w-[60ch] items-start gap-4">
+          {definition.photoKey && (
+            <PersonAvatar
+              name={record[definition.nameKey]}
+              photo={record[definition.photoKey]}
+              className="size-14 sm:size-16"
+            />
           )}
+          <div className="min-w-0">
+            <div className="text-2xs uppercase tracking-kicker text-brand-700">
+              {definition.kicker} · {definition.title}
+            </div>
+            <h2 className="mt-2 text-detail-title">{record[definition.nameKey]}</h2>
+            {tagColumns.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {tagColumns.map((column) => (
+                  <Tag key={column.key} variant={toneForStatus(record[column.key])}>
+                    {record[column.key]}
+                  </Tag>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2.5">

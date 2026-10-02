@@ -251,7 +251,7 @@ export function QuestionsPage() {
         editing === null && (
           <EmptyState
             title="No questions yet"
-            body="An assignment with no questions cannot be sat, however open its window is. Write the first one and the class can answer it."
+            body="Add the questions you want answered in writing, each worth what you give it. Objective questions that mark themselves belong on a quiz."
             action={<Button onClick={() => setEditing('new')}>Add a question</Button>}
           />
         )
@@ -260,8 +260,6 @@ export function QuestionsPage() {
       <div className="mt-3.5 text-xs text-muted-foreground">
         {composed.length} question{composed.length === 1 ? '' : 's'} · {marks} mark
         {marks === 1 ? '' : 's'} in total
-        {record?.passing_score != null && ` · pass at ${record.passing_score}%`}
-        {record?.time_limit ? ` · ${record.time_limit} minutes allowed` : ''}
       </div>
 
       <ConfirmDialog request={confirm.request} onOpenChange={confirm.setOpen} />

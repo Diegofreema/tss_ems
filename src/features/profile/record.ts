@@ -28,6 +28,12 @@ export function initialsOf(parts: (string | null | undefined)[]): string {
   return letters.length ? letters.join('').toUpperCase() : '··'
 }
 
+/** The initials of a whole name as it is written — first word and last. */
+export function initialsOfName(name: string | null | undefined): string {
+  const words = (name ?? '').split(/\s+/).filter((word) => /\p{L}/u.test(word))
+  return initialsOf([words[0], words.length > 1 ? words.at(-1) : undefined])
+}
+
 /**
  * An ISO timestamp as the design writes dates. Anything else is left alone —
  * the API also sends dates as DD/MM/YYYY, which `Date` would read back as the

@@ -44,18 +44,11 @@ const ORDER: Record<AssignmentState, number> = {
 /**
  * How many questions the assignment actually holds.
  *
- * `total_questions` is what the teacher meant to write and `question_count` is
- * what they wrote — assignment 6 says 4 and 1. A student is told the second: an assignment
- * promising four questions and holding one reads as three that failed to load.
+ * `question_count` is what the teacher actually wrote. (`total_questions`, what
+ * they meant to write, went with the rest of the quiz's fields on 2026-10-02.)
  */
 export function questionCount(assignment: Assignment): number | null {
   return assignment.question_count ?? null
-}
-
-/** How long is allowed once started, where the assignment sets a limit at all. */
-function limit(assignment: Assignment): string {
-  const minutes = assignment.time_limit
-  return minutes ? `${minutes}` : 'No limit'
 }
 
 export function assignmentRows(assignments: Assignment[], now = Date.now()): Row[] {
@@ -70,7 +63,6 @@ export function assignmentRows(assignments: Assignment[], now = Date.now()): Row
       title: assignment.title?.trim() || `Assignment ${assignment.id}`,
       subject: text(assignment.subject),
       questions: questionCount(assignment)?.toString() ?? BLANK,
-      minutes: limit(assignment),
       closes: when(schoolTime(assignment.closedate), true),
       state,
 
@@ -78,7 +70,6 @@ export function assignmentRows(assignments: Assignment[], now = Date.now()): Row
       details: text(assignment.details),
       klass: text(assignment.class),
       opens: when(schoolTime(assignment.opendate), true),
-      pass: assignment.passing_score == null ? BLANK : `${assignment.passing_score}%`,
       // The school's own sentence for why it cannot be sat, kept word for word
       // so a student quoting it to the office is quoting the office back.
       why: text(assignment.window_problem),
