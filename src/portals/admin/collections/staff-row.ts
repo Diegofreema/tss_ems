@@ -7,6 +7,7 @@ import { BLANK } from '../../../features/collections/blank.ts'
 import { countryIso } from '../../../features/collections/country-ids.ts'
 import { PHOTO_KEY } from '../../../features/collections/photo-key.ts'
 import type { Row } from '../../../features/collections/types.ts'
+import { teacherCv } from '../../../lib/file-ref.ts'
 import { officePhoto, staffPhoto } from '../../../lib/photo-url.ts'
 import { formatDate } from '../../../lib/format.ts'
 
@@ -333,4 +334,32 @@ export function activityRow(log: ActivityLog): Row {
     action: text(log.description || log.title),
     ip: text(log.ip),
   }
+}
+
+/**
+ * A teacher's documents tab: the photograph and the CV, each listed whether or
+ * not the school holds one — a missing CV is something the office wants to
+ * see is missing.
+ *
+ * The photo is read from `staff_files/`, which is public. The CV is named on
+ * the record but the school hands it over only through
+ * `GET /teachers/{id}/cv`, so the row says where to read it beside the name.
+ */
+export function teacherDocumentRows(teacher: Pick<Teacher, 'passport' | 'cv'>, teacherId: string | number): Row[] {
+  const cv = teacher.cv?.trim() ?? ''
+  return [
+    {
+      id: 'passport',
+      document: 'Passport photograph',
+      file: staffPhoto(teacher.passport),
+      fileTitle: 'Passport photograph',
+    },
+    {
+      id: 'cv',
+      document: 'CV',
+      file: cv,
+      fileFrom: cv ? teacherCv(teacherId) : '',
+      fileTitle: 'CV',
+    },
+  ]
 }

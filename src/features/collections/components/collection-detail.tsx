@@ -1,10 +1,11 @@
 import { isUnsynced, UNSYNCED_REASON } from '../unsynced'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Pencil } from 'lucide-react'
 // `toast` goes back in with the buttons commented out below.
 import { BackLink } from '@/components/page/back-link'
 import { ExternalLink } from '@/components/common/external-link'
+import { FileViewer } from '@/components/common/file-viewer'
 import { PersonAvatar } from '@/components/common/person-avatar'
 import { MissingState } from '@/components/feedback/missing-state'
 import { ConfirmDialog } from '@/components/feedback/confirm-dialog'
@@ -14,6 +15,7 @@ import { Rule } from '@/components/page/rule'
 import { TileStrip } from '@/components/page/tile-strip'
 import { Button } from '@/components/ui/button'
 import { useConfirm } from '@/hooks/use-confirm'
+import { fileLabel, fileRef } from '@/lib/file-ref'
 import { toneForStatus } from '@/lib/status-tone'
 import { BLANK } from '../blank'
 import { hasText } from '../rich-text'
@@ -253,10 +255,9 @@ export function CollectionDetail({
             school holds, or the initials until there is one. */}
         <div className="flex max-w-[60ch] items-start gap-4">
           {definition.photoKey && (
-            <PersonAvatar
+            <RecordPhoto
               name={record[definition.nameKey]}
               photo={record[definition.photoKey]}
-              className="size-14 sm:size-16"
             />
           )}
           <div className="min-w-0">
@@ -420,4 +421,32 @@ export function CollectionDetail({
  */
 function filled(value: string | undefined): boolean {
   return value !== undefined && value.trim() !== '' && value.trim() !== BLANK
+}
+
+/**
+ * The face beside the name, which opens the photograph whole. Only a record
+ * that holds one takes the click: initials are not a picture, and a button
+ * over them would open a viewer with nothing in it.
+ */
+function RecordPhoto({ name, photo }: { name: string; photo: string }) {
+  const [open, setOpen] = useState(false)
+  const avatar = <PersonAvatar name={name} photo={photo} className="size-14 sm:size-16" />
+  if (!fileRef(photo)) return avatar
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        title="View the full photo"
+        className="flex-none cursor-zoom-in rounded-full transition-[box-shadow] hover:ring-2 hover:ring-brand/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      >
+        {avatar}
+        <span className="sr-only">View the full photo of {name}</span>
+      </button>
+      <FileViewer
+        file={open ? { title: `Photo of ${name}`, value: photo, name: fileLabel(photo) } : null}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  )
 }

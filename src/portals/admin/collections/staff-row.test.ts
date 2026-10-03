@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import type { Teacher } from '../../../api/teachers/types.ts'
 import type { Admin } from '../../../api/users/types.ts'
 import {
+  teacherDocumentRows,
   adminDeleteBody,
   adminRow,
   staffDeleteBody,
@@ -414,4 +415,17 @@ test('an office record opens its edit form on the middle name it actually holds'
   for (const none of [null, '', undefined]) {
     assert.equal(adminRow({ ...admin, user: { ...admin.user, mname: none } } as Admin).middlename, '')
   }
+})
+
+test('a teacher\'s documents list the photo and the CV, read from where each is kept', () => {
+  const rows = teacherDocumentRows({ passport: 'face.png', cv: 'cv-2024.pdf' }, 12)
+  assert.deepEqual(rows, [
+    { id: 'passport', document: 'Passport photograph', file: 'staff_files/face.png', fileTitle: 'Passport photograph' },
+    { id: 'cv', document: 'CV', file: 'cv-2024.pdf', fileFrom: 'api:teachers/12/cv', fileTitle: 'CV' },
+  ])
+})
+
+test('a teacher with no files still lists both, with nothing to open', () => {
+  const rows = teacherDocumentRows({ passport: null, cv: '  ' }, 12)
+  assert.deepEqual(rows.map((row) => [row.file, row.fileFrom ?? '']), [['', ''], ['', '']])
 })

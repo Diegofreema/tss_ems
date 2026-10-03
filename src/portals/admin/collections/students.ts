@@ -316,6 +316,32 @@ const PERSON_DETAIL = [
   { key: 'guardianHome', label: 'Guardian address' },
 ]
 
+/**
+ * What the family sent with the application — the birth certificate, the other
+ * certificates, the last school report and the passport photograph — each
+ * opened in the file viewer. The same tab on an applicant and on an enrolled
+ * student, since they are the same record at two points in admission and the
+ * certificates do not stop mattering once the child is admitted.
+ */
+const DOCUMENTS_TAB: NonNullable<CollectionDef['tabs']>[number] = {
+  label: 'Documents on file',
+  columns: [
+    { key: 'document', label: 'Document' },
+    { key: 'file', label: 'File', download: true },
+  ],
+  source: async (recordId) => {
+    const row = applicantRow(await studentsService.get(recordId))
+    return applicantDocuments(row).map((one) => ({
+      id: one.key,
+      document: one.label,
+      // The cell opens whatever name it is given, so a slot with no file has
+      // to hand it nothing rather than the words for nothing.
+      file: one.file,
+      fileTitle: one.label,
+    }))
+  },
+}
+
 export const students: CollectionDef = {
   id: 'students',
   tabs: [
@@ -343,6 +369,7 @@ export const students: CollectionDef = {
       ],
       source: (recordId) => studentsService.results(recordId).then((results) => results.map(resultRow)),
     },
+    DOCUMENTS_TAB,
   ],
   path: '/admin/students',
   kicker: 'Students',
@@ -561,25 +588,7 @@ export const applicants: CollectionDef = {
     { key: 'stage', label: 'Stage' },
     ...PERSON_DETAIL,
   ],
-  tabs: [
-    {
-      label: 'Documents on file',
-      columns: [
-        { key: 'document', label: 'Document' },
-        { key: 'file', label: 'File', download: true },
-      ],
-      source: async (recordId) => {
-        const row = applicantRow(await studentsService.get(recordId))
-        return applicantDocuments(row).map((one) => ({
-          id: one.key,
-          document: one.label,
-          // The cell fetches whatever name it is given, so a slot with no
-          // file has to hand it nothing rather than the words for nothing.
-          file: one.file,
-        }))
-      },
-    },
-  ],
+  tabs: [DOCUMENTS_TAB],
   filters: [
     /*
      * Unset, the page is the queue: everyone still waiting on a decision. The

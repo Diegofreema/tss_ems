@@ -36,6 +36,7 @@ import {
   adminRow,
   parseStaffKey,
   privilegeRow,
+  teacherDocumentRows,
   staffDeleteBody,
   staffRowKind,
   staffTarget,
@@ -517,9 +518,24 @@ const SUBJECTS_TAB: NonNullable<CollectionDef['tabs']>[number] = {
   },
 }
 
+/** What the school holds on file for a teacher: the photo and the CV. */
+const TEACHER_DOCUMENTS_TAB: NonNullable<CollectionDef['tabs']>[number] = {
+  label: 'Documents',
+  columns: [
+    { key: 'document', label: 'Document' },
+    { key: 'file', label: 'File', download: true },
+  ],
+  when: (recordId) => parseStaffKey(recordId).kind === 'teacher',
+  source: async (recordId) => {
+    const { kind, id } = parseStaffKey(recordId)
+    if (kind !== 'teacher') return []
+    return teacherDocumentRows(await teachersService.get(id), id)
+  },
+}
+
 export const staff: CollectionDef = {
   id: 'staff',
-  tabs: [...(ACTIVITY_TAB ?? []), SUBJECTS_TAB],
+  tabs: [...(ACTIVITY_TAB ?? []), SUBJECTS_TAB, TEACHER_DOCUMENTS_TAB],
   path: '/admin/staff',
   kicker: 'Staff',
   title: 'Manage staff',
@@ -764,7 +780,7 @@ export const staffTeachers = staffSlice(
     emptyTitle: 'No teaching records',
     emptyBody: 'Add a teacher to assign them subjects and an arm.',
     detail: TEACHER_DETAIL,
-    tabs: [SUBJECTS_TAB],
+    tabs: [SUBJECTS_TAB, TEACHER_DOCUMENTS_TAB],
     collection: staffBinding('teacher'),
     source: ({ page, q }) => listTeachers(page, q),
     queue: saveStaff('teacher'),

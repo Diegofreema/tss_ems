@@ -38,7 +38,15 @@ export function toTableColumns(
           </span>
         )
       }
-      if (spec.download) return <FileLink name={row[spec.key]} />
+      if (spec.download) {
+        return (
+          <FileLink
+            name={row[spec.key]}
+            from={row[`${spec.key}From`]}
+            title={row[`${spec.key}Title`]}
+          />
+        )
+      }
       if (spec.link) return <ExternalLink href={row[spec.key]} />
       // A tag is a state the record is in; where there is no state to report
       // the cell reads as any other blank rather than as an empty badge.

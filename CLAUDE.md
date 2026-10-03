@@ -289,6 +289,12 @@ every write made after it would wedge the app on one refusal.
   keeps one in its draft. Every document is capped at `DOCUMENT_MAX_BYTES` (1 MB), on the drop
   zone and in the schema. Ported from ems_gold; the field names are the school's and have not yet
   been seen accepted by this backend.
+  **A stored file opens in the viewer, not straight to a download** — `FileLink` and the record
+  photo both open `FileViewer` (`components/common/file-viewer.tsx`): a picture drawn whole, a PDF
+  in a frame, anything else offered to save. `fileRef` in `lib/file-ref.ts` (tested) says where one
+  is read from: a bare filename is a student file through `users/download`, a folder path is a
+  photo's kind of reference, and `api:<path>` is an endpoint that hands a file back — the teacher's
+  CV. A `download` column reads `<key>From` and `<key>Title` off the row beside the filename.
 - **Nothing may read the queue before `storeReady()` resolves.** A persisted collection hydrates
   asynchronously, and until it has, `toArray` is an empty list indistinguishable from an empty
   queue — a drain started early finds nothing and stops, and an `enqueue` numbers its op `1` on top

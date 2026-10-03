@@ -281,7 +281,12 @@ export type ColumnSpec = {
   align?: Align
   /** Renders the value as a status tag, coloured by meaning. */
   tag?: boolean
-  /** The value is a stored filename; the cell fetches and saves it. */
+  /**
+   * The value is a stored filename; the cell opens it in the file viewer.
+   * Two optional keys beside it on the row: `<key>From`, where the file is
+   * read from when that is not the filename (`fileRef`), and `<key>Title`,
+   * what the viewer is headed with.
+   */
   download?: boolean
   /** The value is a URL somewhere else — a meeting room — and opens in a tab. */
   link?: boolean
